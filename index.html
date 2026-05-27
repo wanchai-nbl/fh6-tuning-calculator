@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FH6 Tuning Calculator v3.2</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090f;--bg2:#0c1020;--bg3:#101828;
+  --panel:#121a2c;--panel2:#18243a;
+  --lime:#b5ff00;--lime2:#d4ff4d;
+  --accent:#00d4ff;--accent2:#ff4d00;--accent3:#7fff00;--gold:#ffd700;--purple:#b44fff;
+  --text:#e2e8f0;--muted:#5a7090;--muted2:#8aa0bc;
+  --border:rgba(0,212,255,0.13);
+  --glow:0 0 18px rgba(0,212,255,0.22);--glow2:0 0 16px rgba(255,77,0,0.22);
+  --r:6px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.022) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
+
+/* HDR */
+.hdr{position:relative;z-index:1;text-align:center;padding:24px 16px 16px;border-bottom:1px solid var(--border)}
+.badge{display:inline-block;background:linear-gradient(135deg,#ff4d00,#ff8800);color:#000;font-family:'Orbitron',sans-serif;font-size:9px;font-weight:900;letter-spacing:3px;padding:3px 14px;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);margin-bottom:8px}
+h1{font-family:'Orbitron',sans-serif;font-size:clamp(18px,3.5vw,32px);font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,#fff 0%,#00d4ff 45%,#ff4d00 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1}
+.sub{font-size:10px;letter-spacing:2px;color:var(--muted);margin-top:5px;text-transform:uppercase}
+
+/* TABS */
+.tabs{display:flex;gap:2px;padding:10px 12px 0;position:relative;z-index:1;overflow-x:auto;border-bottom:1px solid var(--border)}
+.tab-btn{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;padding:8px 14px;background:transparent;border:1px solid transparent;border-bottom:none;border-radius:var(--r) var(--r) 0 0;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .2s;text-transform:uppercase}
+.tab-btn:hover{color:var(--text);background:rgba(0,212,255,0.05)}
+.tab-btn.active{color:var(--lime);border-color:var(--border);background:var(--panel);border-bottom:1px solid var(--panel)}
+.tab-pane{display:none;position:relative;z-index:1}
+.tab-pane.active{display:block}
+
+.wrap{max-width:1280px;margin:0 auto;padding:16px 14px 60px}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+@media(max-width:860px){.g2,.g3{grid-template-columns:1fr 1fr}}
+@media(max-width:540px){.g2,.g3{grid-template-columns:1fr}}
+
+/* PANELS */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+.panel.red::before{background:linear-gradient(90deg,var(--accent2),transparent)}
+.panel.lime::before{background:linear-gradient(90deg,var(--lime),transparent)}
+.panel.gold::before{background:linear-gradient(90deg,var(--gold),transparent)}
+.panel.purple::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.ptitle{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2.5px;color:var(--accent);text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:7px}
+.ptitle.red{color:var(--accent2)}.ptitle.lime{color:var(--lime)}.ptitle.gold{color:var(--gold)}.ptitle.purple{color:var(--purple)}
+
+/* FORM */
+.field{margin-bottom:12px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+label{display:block;font-size:10px;letter-spacing:1.8px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+input[type=number],input[type=text],select{width:100%;background:var(--bg2);border:1px solid rgba(0,212,255,0.12);color:var(--text);padding:8px 12px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;border-radius:4px;outline:none;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus{border-color:var(--lime);box-shadow:0 0 14px rgba(181,255,0,0.18)}
+select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M0 0l5 7 5-7z' fill='%23b5ff00'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;appearance:none}
+.hint{font-size:10px;color:rgba(90,112,144,0.75);margin-top:3px;letter-spacing:.4px}
+
+/* RADIO */
+.rg{display:grid;gap:6px}
+.rg input{display:none}
+.rg label{display:flex;align-items:center;justify-content:center;padding:8px 4px;background:var(--bg2);border:1px solid rgba(0,212,255,0.1);border-radius:4px;cursor:pointer;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);transition:all .18s;margin:0;text-align:center;white-space:nowrap;line-height:1.3}
+.rg input:checked+label{border-color:var(--lime);color:var(--lime);background:rgba(181,255,0,0.07);box-shadow:0 0 12px rgba(181,255,0,0.15)}
+.rg.r2{grid-template-columns:1fr 1fr}
+.rg.r3{grid-template-columns:1fr 1fr 1fr}
+.rg.r4{grid-template-columns:1fr 1fr 1fr 1fr}
+.rg.r5{grid-template-columns:1fr 1fr 1fr 1fr 1fr}
+@media(max-width:540px){.rg.r4,.rg.r5{grid-template-columns:1fr 1fr}}
+
+/* CHECKBOX */
+.ck-group{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ck-item{display:flex;align-items:center;gap:7px;padding:7px 10px;background:var(--bg2);border:1px solid rgba(0,212,255,0.1);border-radius:4px;cursor:pointer;transition:all .18s}
+.ck-item:has(input:checked){border-color:var(--lime);background:rgba(181,255,0,0.05)}
+.ck-item input{width:14px;height:14px;accent-color:var(--lime);cursor:pointer}
+.ck-item span{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2)}
+.ck-item:has(input:checked) span{color:var(--lime)}
+.ck-small{font-size:8px!important;color:var(--muted)!important;margin-left:auto;letter-spacing:.3px!important;text-transform:none!important}
+
+/* RANGE SLIDER (custom) */
+.range-wrap{position:relative;padding:4px 0 2px}
+input[type=range]{width:100%;height:4px;appearance:none;background:rgba(255,255,255,0.08);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px rgba(181,255,0,0.5);cursor:pointer;transition:transform .15s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--lime);border:none;box-shadow:0 0 10px rgba(181,255,0,0.5);cursor:pointer}
+.range-labels{display:flex;justify-content:space-between;font-size:11px;letter-spacing:1px;color:var(--muted);margin-top:4px;font-family:'Orbitron',sans-serif}
+.range-val{text-align:center;font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--lime);margin:3px 0 6px}
+
+/* BUTTONS */
+.btn-calc{width:100%;padding:14px;background:linear-gradient(135deg,#ff4d00,#ff8800);border:none;color:#000;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:900;letter-spacing:3px;cursor:pointer;border-radius:4px;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);transition:all .2s;margin-top:4px}
+.btn-calc:hover{box-shadow:var(--glow2);transform:scale(1.005)}
+.btn-sm{padding:6px 13px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:var(--accent);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;border-radius:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;white-space:nowrap}
+.btn-sm:hover{background:rgba(0,212,255,0.18)}
+.btn-sm.lime{background:rgba(181,255,0,0.1);border-color:rgba(181,255,0,0.3);color:var(--lime)}
+.btn-sm.gold{background:rgba(255,215,0,0.1);border-color:rgba(255,215,0,0.3);color:var(--gold)}
+
+/* LAYOUT DETECTOR */
+.layout-detector{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px}
+.layout-detector-title{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;font-family:'Orbitron',sans-serif}
+.layout-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.layout-item{padding:6px 4px;background:var(--bg3);border:1px solid transparent;border-radius:3px;cursor:pointer;text-align:center;transition:all .15s}
+.layout-item:hover{border-color:rgba(181,255,0,0.3)}
+.layout-item.suggested{border-color:var(--lime);background:rgba(181,255,0,0.08)}
+.layout-item.selected{border-color:var(--lime);background:rgba(181,255,0,0.15);box-shadow:0 0 10px rgba(181,255,0,0.2)}
+.layout-icon{font-size:20px;line-height:1}
+.layout-name{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;color:var(--lime);letter-spacing:1px;margin-top:2px}
+.layout-fw{font-size:9px;color:var(--muted);margin-top:1px}
+.layout-badge{font-size:8px;background:rgba(181,255,0,0.15);color:var(--lime);border-radius:2px;padding:1px 4px;margin-top:2px;letter-spacing:.5px;display:none}
+.layout-item.suggested .layout-badge{display:block}
+
+/* RESULTS */
+#results{display:none;animation:fadeUp .4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.rh{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:4px;text-align:center;color:var(--lime);margin:16px 0 12px;display:flex;align-items:center;gap:12px;text-transform:uppercase}
+.rh::before,.rh::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(181,255,0,0.3))}
+.rh::after{background:linear-gradient(90deg,rgba(181,255,0,0.3),transparent)}
+
+/* TUNE CARDS — FH6 style */
+.tc{background:var(--panel2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;position:relative}
+.tc-hdr{padding:8px 14px;background:var(--lime);color:#000;font-family:'Orbitron',sans-serif;font-size:9px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between}
+.tc-hdr.locked{background:#2a2a2a;color:#555}
+.tc-sub{padding:6px 14px 4px;background:rgba(0,0,0,0.3);border-bottom:1px solid var(--border);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;display:flex;justify-content:space-between}
+.tc-rows{padding:2px 0}
+.tr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.03);transition:background .15s}
+.tr:hover{background:rgba(0,212,255,0.03)}
+.tr:last-child{border-bottom:none}
+.tl{font-size:14px;color:var(--muted2)}
+.tv{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;color:#fff}
+.tv.g{color:var(--lime)}.tv.w{color:var(--gold)}.tv.r{color:var(--accent2)}.tv.b{color:var(--accent)}.tv.p{color:var(--purple)}
+
+/* SCALE 1–10 VISUAL */
+.scale10{display:flex;gap:3px;padding:4px 14px 10px;align-items:center}
+.scale10-track{display:flex;gap:2px;flex:1}
+.scale10-pip{flex:1;height:6px;background:rgba(255,255,255,0.07);border-radius:1px;transition:background .3s}
+.scale10-pip.lit{background:var(--lime)}
+.scale10-pip.lit-partial{background:rgba(181,255,0,0.4)}
+.scale10-label{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--muted);white-space:nowrap}
+
+/* AERO PERCENT BAR */
+.aero-pct-wrap{padding:6px 14px 12px}
+.aero-pct-label{font-size:12px;letter-spacing:1.5px;color:var(--muted);font-family:'Orbitron',sans-serif;margin-bottom:5px;text-transform:uppercase}
+.aero-pct-bar{height:12px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden;position:relative}
+.aero-pct-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--lime));border-radius:6px;transition:width .5s cubic-bezier(.34,1.56,.64,1)}
+.aero-pct-val{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:'Orbitron',sans-serif;font-size:12px;color:#000;font-weight:900}
+
+/* BRAKE BAR */
+.brake-bar{display:flex;height:18px;margin:4px 14px 10px;border-radius:3px;overflow:hidden;position:relative}
+.brake-rear{background:rgba(0,212,255,0.35);transition:flex .5s}
+.brake-front{background:rgba(255,77,0,0.45);transition:flex .5s}
+.brake-center{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,0.3)}
+.brake-marker{position:absolute;top:0;bottom:0;width:3px;background:#fff;box-shadow:0 0 6px #fff;border-radius:2px;transition:left .5s}
+.brake-scale-lbl{display:flex;justify-content:space-between;padding:0 14px;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:1px;color:var(--muted);margin-bottom:4px}
+
+/* CENTER DIFF */
+.ctr-bar{display:flex;height:18px;margin:4px 14px 10px;border-radius:3px;overflow:hidden;position:relative}
+.ctr-f{background:rgba(0,212,255,0.35);transition:flex .5s}
+.ctr-r{background:rgba(180,79,255,0.4);transition:flex .5s}
+
+/* LOCK */
+.lock-overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.72);z-index:10;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-radius:var(--r)}
+.lock-overlay.show{display:flex}
+.lock-msg{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1.5px;color:var(--accent2);text-align:center;padding:0 14px;line-height:1.6}
+
+/* TIPS */
+.tip{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.12);border-left:2px solid var(--accent);border-radius:3px;padding:7px 11px;font-size:13px;color:#8aacca;line-height:1.6;margin:5px 8px}
+.tip strong{color:var(--accent)}
+.tip.warn{background:rgba(255,215,0,.04);border-color:rgba(255,215,0,.12);border-left-color:var(--gold)}.tip.warn strong{color:var(--gold)}
+.tip.lime{background:rgba(181,255,0,.04);border-color:rgba(181,255,0,.12);border-left-color:var(--lime)}.tip.lime strong{color:var(--lime)}
+.tip.hot{background:rgba(255,77,0,.04);border-color:rgba(255,77,0,.12);border-left-color:var(--accent2)}.tip.hot strong{color:var(--accent2)}
+
+/* SUM BAR */
+.sum-bar{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px}
+.pi-big{font-family:'Orbitron',sans-serif;font-size:40px;font-weight:900;line-height:1}
+.pi-lbl{font-size:11px;letter-spacing:2px;color:var(--muted);margin-top:2px}
+
+/* TAGS */
+.tag{display:inline-block;padding:2px 9px;border-radius:2px;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase}
+.tag-road{background:rgba(0,212,255,.12);color:var(--accent);border:1px solid rgba(0,212,255,.25)}
+.tag-drift{background:rgba(255,77,0,.12);color:var(--accent2);border:1px solid rgba(255,77,0,.25)}
+.tag-drag{background:rgba(181,255,0,.12);color:var(--lime);border:1px solid rgba(181,255,0,.25)}
+.tag-rally{background:rgba(255,215,0,.12);color:var(--gold);border:1px solid rgba(255,215,0,.25)}
+
+/* EXPORT */
+.export-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--muted2);white-space:pre;overflow-x:auto;line-height:1.7;max-height:280px;overflow-y:auto}
+
+/* SYMPTOM */
+.sym-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+@media(max-width:540px){.sym-grid{grid-template-columns:1fr}}
+.sym-btn{padding:9px 12px;background:var(--bg2);border:1px solid rgba(255,77,0,.15);border-radius:4px;color:var(--muted2);font-family:'Rajdhani',sans-serif;font-size:13px;cursor:pointer;text-align:left;transition:all .18s;display:flex;align-items:center;gap:8px}
+.sym-btn:hover{border-color:rgba(255,77,0,.35);background:rgba(255,77,0,.05)}
+.sym-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(255,77,0,.09)}
+.fix-card{background:var(--panel2);border:1px solid rgba(181,255,0,.15);border-radius:var(--r);overflow:hidden;margin-bottom:9px;animation:fadeUp .3s ease}
+.fix-hdr{padding:8px 14px;background:rgba(181,255,0,.06);border-bottom:1px solid rgba(181,255,0,.12);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--lime);display:flex;align-items:center;justify-content:space-between}
+.fix-body{padding:10px 14px}
+.fix-row{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.adj-val{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700}
+.adj-val.up{color:var(--lime)}.adj-val.down{color:var(--accent2)}
+.p-high{background:rgba(255,77,0,.15);color:var(--accent2);border:1px solid rgba(255,77,0,.25);font-size:8px;font-family:'Orbitron',sans-serif;padding:1px 6px;border-radius:2px;letter-spacing:1px}
+.p-med{background:rgba(255,215,0,.12);color:var(--gold);border:1px solid rgba(255,215,0,.2);font-size:8px;font-family:'Orbitron',sans-serif;padding:1px 6px;border-radius:2px;letter-spacing:1px}
+.p-low{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);font-size:8px;font-family:'Orbitron',sans-serif;padding:1px 6px;border-radius:2px;letter-spacing:1px}
+
+/* NOTIFY */
+.notif{position:fixed;bottom:22px;right:22px;background:var(--lime);color:#000;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;padding:11px 18px;border-radius:4px;z-index:999;animation:slideIn .3s ease;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%)}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+.sg{margin-top:14px}
+footer{text-align:center;padding:24px 16px 18px;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;border-top:1px solid var(--border);margin-top:36px;position:relative;z-index:1}
+
+/* COMPARE */
+.cmp-table{width:100%;border-collapse:collapse;font-size:12px}
+.cmp-table th{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+.cmp-table td{padding:7px 12px;border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:middle}
+.cmp-table tr:hover td{background:rgba(0,212,255,.03)}
+.cmp-table .param{color:var(--muted2);font-size:11px}
+.cmp-table .best{color:var(--lime);font-weight:700;font-family:'Orbitron',sans-serif;font-size:12px}
+.cmp-table .val{color:var(--text);font-family:'Orbitron',sans-serif;font-size:12px}
+.cmp-empty{text-align:center;padding:36px;color:var(--muted);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px}
+
+/* ══════════════════════════════════════════
+   LARGE TEXT OVERRIDE — bump everything up
+   ══════════════════════════════════════════ */
+
+/* Body base */
+body{font-size:16px}
+
+/* Header */
+h1{font-size:clamp(24px,4.5vw,42px)!important}
+.sub{font-size:13px!important}
+.tab-btn{font-size:12px!important;padding:10px 18px!important}
+
+/* Section titles */
+.ptitle{font-size:12px!important;letter-spacing:2px!important;margin-bottom:14px!important}
+.badge{font-size:11px!important}
+
+/* Form labels & inputs */
+label{font-size:13px!important;letter-spacing:1.2px!important;margin-bottom:6px!important}
+input[type=number],input[type=text],select{font-size:16px!important;padding:10px 14px!important}
+.hint{font-size:12px!important}
+
+/* Radio buttons */
+.rg label{font-size:13px!important;padding:10px 6px!important}
+
+/* Checkbox */
+.ck-item span:not(.ck-small){font-size:13px!important}
+.ck-small{font-size:11px!important}
+
+/* Range slider labels */
+.range-labels{font-size:13px!important}
+.range-val{font-size:16px!important}
+
+/* Buttons */
+.btn-calc{font-size:14px!important;padding:16px!important;letter-spacing:3px!important}
+.btn-sm{font-size:11px!important;padding:8px 15px!important}
+
+/* Layout detector */
+.layout-detector-title{font-size:12px!important}
+.layout-icon{font-size:26px!important}
+.layout-name{font-size:12px!important}
+.layout-fw{font-size:11px!important}
+.layout-badge{font-size:11px!important}
+
+/* Results header */
+.rh{font-size:13px!important;letter-spacing:4px!important}
+
+/* Tune cards */
+.tc-hdr{font-size:12px!important;letter-spacing:2px!important;padding:10px 16px!important}
+.tc-sub{font-size:12px!important;letter-spacing:1.5px!important;padding:7px 16px 5px!important}
+.tr{padding:11px 16px!important}
+.tl{font-size:15px!important}
+.tv{font-size:20px!important}
+
+/* Scale pip labels */
+.scale10-label{font-size:12px!important}
+.scale10-pip{height:8px!important}
+
+/* Aero bars */
+.aero-pct-label{font-size:13px!important}
+.aero-pct-val{font-size:13px!important}
+.aero-pct-bar{height:16px!important}
+
+/* Brake / diff bar labels */
+.brake-scale-lbl{font-size:11px!important}
+.brake-bar{height:22px!important}
+.ctr-bar{height:22px!important}
+
+/* Lock overlay */
+.lock-msg{font-size:13px!important;letter-spacing:1.2px!important}
+
+/* Tips */
+.tip{font-size:14px!important;padding:10px 14px!important}
+
+/* Summary */
+.pi-big{font-size:52px!important}
+.pi-lbl{font-size:13px!important}
+.tag{font-size:11px!important;padding:3px 11px!important}
+
+/* Export box */
+.export-box{font-size:14px!important}
+
+/* Symptom fixer */
+.sym-btn{font-size:15px!important;padding:12px 14px!important}
+.fix-hdr{font-size:12px!important;letter-spacing:1.5px!important;padding:10px 16px!important}
+.fix-body{padding:12px 16px!important}
+.adj-val{font-size:14px!important}
+.p-high,.p-med,.p-low{font-size:11px!important}
+
+/* Compare table */
+.cmp-table{font-size:14px!important}
+.cmp-table th{font-size:11px!important;padding:10px 14px!important}
+.cmp-table td{padding:9px 14px!important}
+.cmp-table .param{font-size:13px!important}
+.cmp-table .best,.cmp-table .val{font-size:14px!important}
+.cmp-empty{font-size:13px!important}
+
+/* Notify */
+.notif{font-size:13px!important;padding:13px 22px!important}
+
+/* Footer */
+footer{font-size:12px!important}
+
+/* Info panel tips inside panels */
+.panel .ptitle~div{font-size:13px!important;line-height:2!important}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="badge">Forza Horizon 6</div>
+  <h1>TUNING CALCULATOR <span style="font-size:.4em;letter-spacing:2px;opacity:.5">v3</span></h1>
+  <div class="sub">Simple · Accurate · BAR / KGF / Scale 1–10 · Auto Layout Detection</div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('calc',this)">⚙️ Calculator</button>
+  <button class="tab-btn" onclick="switchTab('compare',this)">📊 Compare</button>
+  <button class="tab-btn" onclick="switchTab('symptom',this)">🩺 Symptom Fixer</button>
+</div>
+
+<!-- ═══ CALCULATOR TAB ═══ -->
+<div id="tab-calc" class="tab-pane active">
+<div class="wrap">
+<div class="g2">
+
+<!-- LEFT -->
+<div style="display:flex;flex-direction:column;gap:14px">
+
+  <div class="panel">
+    <div class="ptitle"><span>🚗</span> ข้อมูลรถ</div>
+    <div class="field">
+      <label>ชื่อรถ (ทางเลือก)</label>
+      <input type="text" id="carName" placeholder="e.g. 2000 Nissan Skyline GT-R V-spec II">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Power (HP)</label>
+        <input type="number" id="power" value="281" min="80" max="2500" step="5">
+      </div>
+      <div class="field">
+        <label>Torque (N·m)</label>
+        <input type="number" id="torque" value="392" min="60" max="3000" step="5">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Weight (kg)</label>
+        <input type="number" id="weight" value="1560" min="600" max="3500" step="10">
+      </div>
+      <div class="field">
+        <label>Front Weight (%)</label>
+        <input type="number" id="frontWeight" value="55" min="25" max="78" step="1" oninput="autoLayout()">
+        <div class="hint">กรอกแล้วระบบ Auto-detect layout ให้</div>
+      </div>
+    </div>
+
+    <!-- ENGINE LAYOUT DETECTOR -->
+    <div class="field">
+      <label>Engine Layout <span style="color:var(--lime);font-size:9px">(ระบบแนะนำจากน้ำหนักหน้า)</span></label>
+      <div class="layout-detector">
+        <div class="layout-detector-title">เลือก Layout — คลิกที่รถที่ตรงกับรถของคุณ</div>
+        <div class="layout-grid" id="layoutGrid">
+          <!-- filled by JS -->
+        </div>
+        <div id="layoutNote" style="margin-top:8px;font-size:10px;color:var(--gold);background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.15);border-radius:3px;padding:5px 9px;display:none"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Aspiration <span style="color:var(--lime);font-size:9px">— ดูจาก Upgrade Shop → Engine</span></label>
+      <div class="rg r5">
+        <input type="radio" name="aspir" id="a_na" value="na" checked><label for="a_na">NA<br><span style="font-size:8px;color:var(--muted)">สูบดูดอากาศ</span></label>
+        <input type="radio" name="aspir" id="a_sc" value="super"><label for="a_sc">SC<br><span style="font-size:8px;color:var(--muted)">ซูเปอร์ชาร์จ</span></label>
+        <input type="radio" name="aspir" id="a_t" value="turbo"><label for="a_t">Turbo<br><span style="font-size:8px;color:var(--muted)">เทอร์โบ</span></label>
+        <input type="radio" name="aspir" id="a_tt" value="twin"><label for="a_tt">Twin-T<br><span style="font-size:8px;color:var(--muted)">เทอร์โบคู่</span></label>
+        <input type="radio" name="aspir" id="a_ev" value="electric"><label for="a_ev">Electric<br><span style="font-size:8px;color:var(--muted)">ไฟฟ้า</span></label>
+      </div>
+    </div>
+    <div class="field">
+      <label>Drivetrain</label>
+      <div class="rg r3">
+        <input type="radio" name="drive" id="rwd" value="rwd"><label for="rwd">RWD<br><span style="font-size:8px;color:var(--muted)">ขับล้อหลัง</span></label>
+        <input type="radio" name="drive" id="fwd" value="fwd"><label for="fwd">FWD<br><span style="font-size:8px;color:var(--muted)">ขับล้อหน้า</span></label>
+        <input type="radio" name="drive" id="awd" value="awd" checked><label for="awd">AWD<br><span style="font-size:8px;color:var(--muted)">ขับ 4 ล้อ</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPGRADES -->
+  <div class="panel red">
+    <div class="ptitle red"><span>🔒</span> Upgrades ที่ติดตั้งแล้ว</div>
+    <div class="hint" style="margin-bottom:10px">เช็กใน Upgrade Shop → ติ๊กเฉพาะที่ติดตั้งแล้วจริงๆ</div>
+    <div class="ck-group">
+      <label class="ck-item"><input type="checkbox" id="ck_susp" checked onchange="updUgp()"><span>Race Spring &amp; Damper</span><span class="ck-small">→ unlock Alignment, Springs, Damping</span></label>
+      <label class="ck-item"><input type="checkbox" id="ck_arb" checked onchange="updUgp()"><span>Race Anti-Roll Bar</span><span class="ck-small">→ unlock ARB sliders</span></label>
+      <label class="ck-item"><input type="checkbox" id="ck_trans" checked onchange="updUgp()"><span>Race Transmission</span><span class="ck-small">→ unlock Gear Ratios</span></label>
+      <label class="ck-item"><input type="checkbox" id="ck_brake" checked onchange="updUgp()"><span>Race Brakes</span><span class="ck-small">→ unlock Brake Balance</span></label>
+      <label class="ck-item"><input type="checkbox" id="ck_diff" checked onchange="updUgp()"><span>Race/Sport Differential</span><span class="ck-small">→ unlock Differential</span></label>
+      <label class="ck-item"><input type="checkbox" id="ck_aero" onchange="updUgp()"><span>Adjustable Aero</span><span class="ck-small">→ unlock Downforce sliders</span></label>
+    </div>
+    <div id="upgTip" class="tip warn" style="margin-top:8px;display:none"></div>
+  </div>
+
+</div><!-- /left -->
+
+<!-- RIGHT -->
+<div style="display:flex;flex-direction:column;gap:14px">
+
+  <div class="panel step-block" id="step2" style="border-top:2px solid var(--accent2)">
+    <div class="ptitle red"><span>⚙️</span> <span class="step-badge" id="badge2">2</span> Build &amp; Discipline</div>
+
+    <div class="field">
+      <label>Discipline (ประเภทการแข่ง)</label>
+      <div class="rg r4">
+        <input type="radio" name="disc" id="road" value="road" checked><label for="road">Road<br><span style="font-size:8px;color:var(--muted)">ถนน/วงจร</span></label>
+        <input type="radio" name="disc" id="rally" value="rally"><label for="rally">Rally<br><span style="font-size:8px;color:var(--muted)">ดิน/กรวด</span></label>
+        <input type="radio" name="disc" id="drag" value="drag"><label for="drag">Drag<br><span style="font-size:8px;color:var(--muted)">ทางตรง</span></label>
+        <input type="radio" name="disc" id="drift" value="drift"><label for="drift">Drift<br><span style="font-size:8px;color:var(--muted)">ดริฟต์</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>PI Class</label>
+      <select id="piClass">
+        <option value="D">D Class (100–400)</option>
+        <option value="C">C Class (401–500)</option>
+        <option value="B">B Class (501–600)</option>
+        <option value="A" selected>A Class (601–700)</option>
+        <option value="S1">S1 Class (701–800)</option>
+        <option value="S2">S2 Class (801–900)</option>
+        <option value="R">R Class (901–998)</option>
+        <option value="X">X Class (999)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>ยาง (Tire Compound)</label>
+      <select id="tireComp">
+        <option value="stock">Stock / OEM (ยางติดรถ)</option>
+        <option value="street">Street Tires</option>
+        <option value="sport">Sport Tires</option>
+        <option value="race" selected>Race Tires</option>
+        <option value="semi">Semi-Slick</option>
+        <option value="rally">Rally Tires</option>
+        <option value="drag">Drag Tires (Slick)</option>
+      </select>
+    </div>
+
+    <!-- GEARING STYLE — replaces "Top Speed Target" -->
+    <div class="field">
+      <label>Gearing Style <span style="color:var(--muted);font-weight:400;font-size:9px">(แทนที่ Top Speed Target)</span></label>
+      <div class="range-val" id="gearStyleVal">เน้น Acceleration ↔ Top Speed: กลาง</div>
+      <div class="range-wrap">
+        <input type="range" id="gearStyle" min="0" max="10" value="5" oninput="updGearStyle()">
+        <div class="range-labels">
+          <span>🏎️ Acceleration<br>ออกตัวแรง</span>
+          <span style="text-align:right">🏁 Top Speed<br>ความเร็วสูงสุด</span>
+        </div>
+      </div>
+      <div class="hint" style="margin-top:6px">ไม่ต้องรู้ Top Speed — ดึง slider ตามสไตล์การขับ</div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Number of Gears</label>
+        <select id="gears">
+          <option value="5">5 Speeds</option>
+          <option value="6" selected>6 Speeds</option>
+          <option value="7">7 Speeds</option>
+          <option value="8">8 Speeds</option>
+          <option value="9">9 Speeds</option>
+          <option value="10">10 Speeds</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Transmission Type <span style="color:var(--lime);font-size:9px">— มีผลต่อ ratio</span></label>
+        <select id="transType">
+          <option value="sport">Sport Transmission</option>
+          <option value="race" selected>Race Transmission</option>
+          <option value="rally">Rally Transmission</option>
+          <option value="drift">Drift Transmission</option>
+        </select>
+      </div>
+    </div>
+    <div id="transNote" class="tip" style="margin-bottom:8px;display:none"></div>
+
+
+
+    <!-- AERO RANGE (KGF from game) -->
+    <div class="field" id="aeroRangeField">
+      <label>Aero Range KGF <span style="color:var(--lime);font-size:9px">ดูจาก Tune → Aero ในเกม (ถ้ามี Adjustable Aero)</span></label>
+      <div class="field-row">
+        <div class="field">
+          <label>Front Min → Max</label>
+          <div style="display:flex;gap:6px">
+            <input type="number" id="aeroFmin" value="0" min="0" max="5000" step="1" placeholder="Min" style="width:50%">
+            <input type="number" id="aeroFmax" value="500" min="1" max="5000" step="1" placeholder="Max" style="width:50%">
+          </div>
+        </div>
+        <div class="field">
+          <label>Rear Min → Max</label>
+          <div style="display:flex;gap:6px">
+            <input type="number" id="aeroRmin" value="0" min="0" max="5000" step="1" placeholder="Min" style="width:50%">
+            <input type="number" id="aeroRmax" value="500" min="1" max="5000" step="1" placeholder="Max" style="width:50%">
+          </div>
+        </div>
+      </div>
+      <div class="tip lime" style="margin-top:4px">💡 เข้าเกม → Tune → Aero → เลื่อน slider จนสุดทั้งสองด้าน จดตัวเลข KGF แล้วใส่ที่นี่</div>
+    </div>
+
+    <!-- SPRING RANGE (N/mm from game) -->
+    <div class="field">
+      <label>Spring Range N/mm <span style="color:var(--lime);font-size:9px">ดูจาก Tune → Springs ในเกม</span></label>
+      <div class="field-row">
+        <div class="field">
+          <label>Min (Soft สุด)</label>
+          <input type="number" id="springMin" value="100" min="10" max="5000" step="10" placeholder="เช่น 100">
+          <div class="hint">เลื่อน slider ไป Soft สุด ดูตัวเลข</div>
+        </div>
+        <div class="field">
+          <label>Max (Stiff สุด)</label>
+          <input type="number" id="springMax" value="2000" min="50" max="20000" step="10" placeholder="เช่น 2000">
+          <div class="hint">เลื่อน slider ไป Stiff สุด ดูตัวเลข</div>
+        </div>
+      </div>
+      <div class="tip lime" style="margin-top:4px">💡 เข้าเกม → Tune → Springs → เลื่อน slider จนสุดทั้งสองด้าน จดตัวเลข N/mm แล้วใส่ที่นี่</div>
+    </div>
+
+
+    <!-- RIDE HEIGHT RANGE (CM from game) -->
+    <div class="field" id="rhRangeField">
+      <label>Ride Height Range CM <span style="color:var(--lime);font-size:9px">ดูจาก Tune → Springs → Ride Height</span></label>
+      <div class="field-row">
+        <div class="field">
+          <label>Front Min → Max</label>
+          <div style="display:flex;gap:6px">
+            <input type="number" id="rhFmin" value="10.0" min="1" max="100" step="0.1" placeholder="Min" style="width:50%">
+            <input type="number" id="rhFmax" value="25.0" min="2" max="100" step="0.1" placeholder="Max" style="width:50%">
+          </div>
+        </div>
+        <div class="field">
+          <label>Rear Min → Max</label>
+          <div style="display:flex;gap:6px">
+            <input type="number" id="rhRmin" value="10.0" min="1" max="100" step="0.1" placeholder="Min" style="width:50%">
+            <input type="number" id="rhRmax" value="25.0" min="2" max="100" step="0.1" placeholder="Max" style="width:50%">
+          </div>
+        </div>
+      </div>
+      <div class="tip lime" style="margin-top:4px">💡 เข้าเกม → Tune → Springs → Ride Height → เลื่อน slider สุดทั้งสองด้าน จดตัวเลข CM แยก Front/Rear</div>
+    </div>
+
+    <div class="field-err-msg" id="calcErrMsg" style="display:none;text-align:center;font-size:12px;color:#ff6b6b;margin-bottom:6px"></div>
+    <button class="btn-calc" id="btnCalc" onclick="validateAndCalc()">⚡ CALCULATE TUNE</button>
+  </div>
+
+  <!-- INFO PANEL -->
+  <div class="panel lime">
+    <div class="ptitle lime"><span>💡</span> วิธีหาข้อมูล</div>
+    <div style="font-size:11px;color:var(--muted2);line-height:1.9">
+      <div>📱 <strong style="color:var(--text)">Power / Torque / Weight / Front%</strong><br>→ My Cars → เลือกรถ → กด Details</div>
+      <div style="margin-top:6px">🔧 <strong style="color:var(--text)">Engine Layout</strong> — ระบบ Auto-detect ให้จาก Front%<br>→ FR ≈55–65% | FF ≈60–70% | MR ≈35–48% | RR ≈25–38%</div>
+      <div style="margin-top:6px">🎮 <strong style="color:var(--text)">Aspiration</strong> — ดูจาก Upgrade Shop → Engine<br>→ NA=ไม่มี | SC=Supercharger | Turbo/Twin | Electric</div>
+      <div style="margin-top:6px">⚙️ <strong style="color:var(--text)">Transmission Type</strong> — ดูจาก Upgrade Shop → Drivetrain<br>→ Sport=ขับทั่วไป | Race=ติดตาม | Rally=ดิน | Drift=สไลด์</div>
+      <div style="margin-top:6px">🚗 <strong style="color:var(--text)">ยาง Stock</strong> — ใส่ "Stock / OEM" ค่า pressure จะสูงกว่าปกติเล็กน้อย เพราะยาง OEM เย็นกว่า</div>
+    </div>
+  </div>
+
+</div><!-- /right -->
+</div><!-- /g2 -->
+
+<!-- RESULTS -->
+<div id="results">
+  <div class="rh">⬡ TUNE OUTPUT ⬡</div>
+
+  <!-- SUMMARY -->
+  <div class="sum-bar">
+    <div>
+      <div id="rCar" style="font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;margin-bottom:3px">—</div>
+      <div id="rSum" style="font-size:10px;color:var(--muted);letter-spacing:.4px">—</div>
+    </div>
+    <div style="text-align:center">
+      <div class="pi-big" id="rPI">—</div>
+      <div class="pi-lbl" id="rPIL">PI CLASS</div>
+      <div id="rTag" style="margin-top:4px"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn-sm lime" onclick="toggleExport()">📋 Export</button>
+      <button class="btn-sm gold" onclick="saveTune()">💾 Save</button>
+    </div>
+  </div>
+
+  <!-- ENGINE NOTE -->
+  <div id="engNote" class="tip sg" style="display:none;margin-bottom:12px"></div>
+  <div id="layoutFYI" class="tip warn sg" style="display:none;margin-bottom:12px"></div>
+  <div id="tireNote" class="tip lime sg" style="display:none;margin-bottom:12px"></div>
+
+  <!-- ROW 1 -->
+  <div class="g3 sg">
+
+    <!-- TIRES (BAR) -->
+    <div class="tc">
+      <div class="tc-hdr">TIRES</div>
+      <div class="tc-sub"><span>Tire Pressure</span><span>Low ←→ High · BAR</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Front (ใส่ค่านี้ในเกม)</span><span class="tv g" id="rTF">—</span></div>
+        <div class="tr"><span class="tl">Rear (ใส่ค่านี้ในเกม)</span><span class="tv g" id="rTR">—</span></div>
+        <div class="tr"><span class="tl">Target Warm (Telemetry)</span><span class="tv" style="font-size:11px">2.2–2.4 BAR</span></div>
+      </div>
+      <div class="tip lime">ขับอุ่น 2 นาที → เช็ก Telemetry ให้ได้ <strong>2.2–2.4 BAR</strong><br>ถ้าสูงกว่า: ลดค่า Cold ลง 0.05 | ต่ำกว่า: เพิ่ม 0.05</div>
+    </div>
+
+    <!-- ALIGNMENT -->
+    <div class="tc" style="position:relative">
+      <div class="tc-hdr" id="hdA">ALIGNMENT</div>
+      <div class="tc-sub"><span>Camber</span><span>Negative ←→ Positive</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Front Camber</span><span class="tv w" id="rCF">—</span></div>
+        <div class="tr"><span class="tl">Rear Camber</span><span class="tv w" id="rCR">—</span></div>
+      </div>
+      <div class="tc-sub"><span>Toe</span><span>In ←→ Out</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Front Toe</span><span class="tv" id="rToeF">—</span></div>
+        <div class="tr"><span class="tl">Rear Toe</span><span class="tv" id="rToeR">—</span></div>
+      </div>
+      <div class="tc-sub"><span>Caster</span><span>Low ←→ High</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Caster Angle</span><span class="tv g" id="rCast">—</span></div>
+      </div>
+      <div class="lock-overlay" id="lo_align"><div class="lock-msg">🔒 ต้องการ<br>Race Spring &amp; Damper</div></div>
+    </div>
+
+    <!-- BRAKES -->
+    <div class="tc" style="position:relative">
+      <div class="tc-hdr" id="hdBr">BRAKE</div>
+      <div class="tc-sub"><span>Braking Force</span><span>Rear ←→ Front</span></div>
+      <div class="brake-scale-lbl"><span>REAR</span><span>CENTER</span><span>FRONT</span></div>
+      <div class="brake-bar">
+        <div class="brake-rear" id="bkRear" style="flex:48"></div>
+        <div class="brake-front" id="bkFront" style="flex:52"></div>
+        <div class="brake-center"></div>
+        <div class="brake-marker" id="bkMark" style="left:52%"></div>
+      </div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Balance</span><span class="tv r" id="rBB">—</span></div>
+      </div>
+      <div class="tc-sub"><span>Braking Force</span><span>Low ←→ High</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Pressure</span><span class="tv" id="rBP">—</span></div>
+      </div>
+      <div class="lock-overlay" id="lo_brake"><div class="lock-msg">🔒 ต้องการ<br>Race Brakes</div></div>
+    </div>
+
+  </div><!-- /row1 -->
+
+  <!-- ROW 2 -->
+  <div class="g3 sg">
+
+    <!-- ARB -->
+    <div class="tc" style="position:relative">
+      <div class="tc-hdr" id="hdArb">ANTIROLL BARS</div>
+      <div class="tc-sub"><span>Anti-Roll Bars</span><span>Soft ←→ Stiff · Scale 1–65</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Front ARB</span><span class="tv" id="rAF">—</span></div>
+      </div>
+      <div class="scale10" id="sc_arbF"><span class="scale10-label">Soft</span><div class="scale10-track" id="tr_arbF"></div><span class="scale10-label">Stiff</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Rear ARB</span><span class="tv" id="rAR">—</span></div>
+      </div>
+      <div class="scale10" id="sc_arbR"><span class="scale10-label">Soft</span><div class="scale10-track" id="tr_arbR"></div><span class="scale10-label">Stiff</span></div>
+      <div class="tip">Front ARB ↑ = understeer ↑ | Rear ARB ↑ = oversteer ↑<br>ปรับ ratio ไม่ใช่ค่าสมบูรณ์</div>
+      <div class="lock-overlay" id="lo_arb"><div class="lock-msg">🔒 ต้องการ<br>Race Anti-Roll Bar</div></div>
+    </div>
+
+    <!-- SPRINGS -->
+    <div class="tc" style="position:relative">
+      <div class="tc-hdr" id="hdSp">SPRINGS</div>
+      <div class="tc-sub"><span>Springs</span><span>เลื่อน slider ไปที่ % นี้</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Front Spring</span><span class="tv g" id="rSF">—</span></div>
+      </div>
+      <div style="padding:2px 14px 8px">
+        <div class="aero-pct-bar"><div class="aero-pct-fill" id="spFbar" style="background:linear-gradient(90deg,var(--lime),var(--lime2))"></div><div class="aero-pct-val" id="spFpct" style="color:#000"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--muted);font-family:'Orbitron',sans-serif;margin-top:3px"><span>◀ SOFT</span><span>STIFF ▶</span></div>
+      </div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Rear Spring</span><span class="tv g" id="rSR">—</span></div>
+      </div>
+      <div style="padding:2px 14px 8px">
+        <div class="aero-pct-bar"><div class="aero-pct-fill" id="spRbar" style="background:linear-gradient(90deg,var(--lime),var(--lime2))"></div><div class="aero-pct-val" id="spRpct" style="color:#000"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--muted);font-family:'Orbitron',sans-serif;margin-top:3px"><span>◀ SOFT</span><span>STIFF ▶</span></div>
+      </div>
+      <div class="tc-sub" style="margin-top:2px"><span>Ride Height</span><span>Low ←→ High</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Front Ride Height (cm)</span><span class="tv" id="rRHF">—</span></div>
+        <div class="tr"><span class="tl">Rear Ride Height (cm)</span><span class="tv" id="rRHR">—</span></div>
+      </div>
+      <div class="tip warn">ใส่ตัวเลข <strong>N/mm</strong> ตรงๆ ในเกมได้เลย<br>ถ้าค่าเกิน range ของรถ ให้เลื่อน slider ไปใกล้สุดที่ทำได้</div>
+      <div class="lock-overlay" id="lo_spring"><div class="lock-msg">🔒 ต้องการ<br>Race Spring &amp; Damper</div></div>
+    </div>
+
+    <!-- DAMPING -->
+    <div class="tc" style="position:relative">
+      <div class="tc-hdr" id="hdDa">DAMPING</div>
+      <div class="tc-sub"><span>Rebound Stiffness</span><span>Soft ←→ Stiff · Scale 1–20</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Front Rebound</span><span class="tv" id="rReF">—</span></div>
+        <div class="tr"><span class="tl">Rear Rebound</span><span class="tv" id="rReR">—</span></div>
+      </div>
+      <div class="tc-sub" style="margin-top:2px"><span>Bump Stiffness</span><span>Soft ←→ Stiff · Scale 1–20</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Front Bump</span><span class="tv" id="rBuF">—</span></div>
+        <div class="tr"><span class="tl">Rear Bump</span><span class="tv" id="rBuR">—</span></div>
+      </div>
+      <div class="tip"><strong>Rebound ควบคุมการกระเด้ง</strong> | Bump ควบคุมการกดลง<br>ปกติ Rebound = Bump × 1.35–1.45</div>
+      <div class="lock-overlay" id="lo_damp"><div class="lock-msg">🔒 ต้องการ<br>Race Spring &amp; Damper</div></div>
+    </div>
+
+  </div><!-- /row2 -->
+
+  <!-- ROW 3 -->
+  <div class="g3 sg">
+
+    <!-- DIFFERENTIAL -->
+    <div class="tc" style="position:relative">
+      <div class="tc-hdr" id="hdDi">DIFFERENTIAL</div>
+      <div id="diffFront" style="display:none">
+        <div class="tc-sub"><span>Front</span><span>Low ←→ High</span></div>
+        <div class="tc-rows">
+          <div class="tr"><span class="tl">Front Acceleration</span><span class="tv b" id="rDFA">—</span></div>
+          <div class="tr"><span class="tl">Front Deceleration</span><span class="tv" id="rDFD">—</span></div>
+        </div>
+      </div>
+      <div class="tc-sub"><span id="diffRearLbl">Rear</span><span>Low ←→ High</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl" id="rDRA_l">Rear Acceleration</span><span class="tv g" id="rDRA">—</span></div>
+        <div class="tr"><span class="tl" id="rDRD_l">Rear Deceleration</span><span class="tv" id="rDRD">—</span></div>
+      </div>
+      <div id="diffCenter" style="display:none">
+        <div class="tc-sub"><span>Center Balance</span><span>Front ←→ Rear</span></div>
+        <div class="brake-scale-lbl"><span>FRONT</span><span>REAR</span></div>
+        <div class="ctr-bar">
+          <div class="ctr-f" id="ctrF" style="flex:50"></div>
+          <div class="ctr-r" id="ctrR" style="flex:50"></div>
+          <div class="brake-marker" id="ctrMark" style="left:50%"></div>
+        </div>
+        <div class="tc-rows">
+          <div class="tr"><span class="tl">Center Balance</span><span class="tv p" id="rDC">—</span></div>
+        </div>
+      </div>
+      <div class="tip" id="diffTip">—</div>
+      <div class="lock-overlay" id="lo_diff"><div class="lock-msg">🔒 ต้องการ<br>Race/Sport Differential</div></div>
+    </div>
+
+    <!-- AERO — % of slider range -->
+    <div class="tc" style="position:relative">
+      <div class="tc-hdr" id="hdAe">AERO</div>
+      <div class="tc-sub"><span>Downforce</span><span>Speed ←→ Cornering · KGF</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Front Downforce</span><span class="tv g" id="aeFpct">—</span></div>
+      </div>
+      <div style="padding:2px 14px 10px">
+        <div class="aero-pct-bar"><div class="aero-pct-fill" id="aeFbar"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-family:'Orbitron',sans-serif;margin-top:3px"><span>◀ SPEED</span><span>CORNERING ▶</span></div>
+      </div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Rear Downforce</span><span class="tv g" id="aeRpct">—</span></div>
+      </div>
+      <div style="padding:2px 14px 10px">
+        <div class="aero-pct-bar"><div class="aero-pct-fill" id="aeRbar"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-family:'Orbitron',sans-serif;margin-top:3px"><span>◀ SPEED</span><span>CORNERING ▶</span></div>
+      </div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Aero F:R Balance</span><span class="tv b" id="rAeRatio">—</span></div>
+      </div>
+      <div class="tip" id="aeroTip">—</div>
+      <div class="tip warn" style="margin-top:2px">💡 ใส่ Aero Min/Max KGF ในฟอร์มด้านบน → โปรแกรมจะแสดงเป็น <strong>KGF</strong> ตรงๆ<br>ถ้าไม่ใส่ → แสดงเป็น % ของ slider แทน</div>
+      <div class="lock-overlay show" id="lo_aero"><div class="lock-msg">🔒 ต้องการ<br>Adjustable Aero</div></div>
+    </div>
+
+    <!-- GEARING -->
+    <div class="tc" style="position:relative">
+      <div class="tc-hdr" id="hdGe">GEARING</div>
+      <div class="tc-sub"><span>Forward Gears</span><span>Speed ←→ Acceleration</span></div>
+      <div class="tc-rows">
+        <div class="tr"><span class="tl">Final Drive</span><span class="tv r" id="rFD">—</span></div>
+        <div id="gearRows"></div>
+      </div>
+      <div id="gearSpeedViz" style="padding:10px 14px;background:rgba(0,0,0,.2)">
+        <div style="font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:8px">ความเร็วสูงสุดต่อเกียร์ (km/h)</div>
+        <div id="gearBars"></div>
+      </div>
+      <div class="tip">Final Drive ↑ = Top Speed ↑ | Final Drive ↓ = Acceleration ↑</div>
+      <div class="lock-overlay" id="lo_gear"><div class="lock-msg">🔒 ต้องการ<br>Race Transmission</div></div>
+    </div>
+
+  </div><!-- /row3 -->
+
+  <!-- EXPORT -->
+  <div id="exportSection" class="sg" style="display:none">
+    <div class="panel lime">
+      <div class="ptitle lime"><span>📋</span> Export Tune Sheet
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn-sm lime" onclick="copyTune()">📋 Copy</button>
+          <button class="btn-sm" onclick="$('exportSection').style.display='none'">✕</button>
+        </div>
+      </div>
+      <div class="export-box" id="exportBox">—</div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="histSection" class="sg" style="display:none">
+    <div class="panel gold">
+      <div class="ptitle gold"><span>💾</span> Saved Tunes
+        <button class="btn-sm" style="margin-left:auto" onclick="clearHist()">Clear All</button>
+      </div>
+      <div id="histList"></div>
+    </div>
+  </div>
+
+</div><!-- /results -->
+</div></div><!-- /wrap tab-calc -->
+
+<!-- ═══ COMPARE TAB ═══ -->
+<div id="tab-compare" class="tab-pane">
+<div class="wrap">
+  <div class="panel sg" style="margin-top:4px">
+    <div class="ptitle"><span>📊</span> Discipline Comparison — กด Calculate ก่อน</div>
+    <div id="cmpContent"><div class="cmp-empty">⚠ กลับไปที่ Calculator แล้วกด Calculate ก่อน</div></div>
+  </div>
+</div></div>
+
+<!-- ═══ SYMPTOM TAB ═══ -->
+<div id="tab-symptom" class="tab-pane">
+<div class="wrap">
+  <div class="panel sg" style="margin-top:4px">
+    <div class="ptitle purple"><span>🩺</span> Symptom Fixer — เลือกอาการที่รู้สึกได้</div>
+    <div class="sym-grid" id="symBtns"></div>
+    <div id="fixOut"></div>
+  </div>
+</div></div>
+
+<footer style="font-size:11px;letter-spacing:1px;line-height:2">
+  FH6 Tuning Calculator · BAR / KGF / N/mm · Not affiliated with Turn 10 / Playground Games
+  <br>
+  <span style="color:var(--muted2)">
+    🎮 Concept &amp; Testing : <strong style="color:var(--lime)">Wanchai Nakbanlang</strong>
+    <span style="color:var(--muted);margin:0 8px">·</span>
+    🤖 Development : <strong style="color:var(--accent)">Claude (Anthropic)</strong>
+  </span>
+  <br>
+  <span style="color:var(--muted);font-size:9px">FB : Wanchai nakbanlang</span>
+</footer>
+
+<script>
+// ═══ CONSTANTS ══════════════════════════════════════════════
+const LAYOUTS=[
+  {id:'ff', icon:'🚙', name:'FF', fw:'60–75%', desc:'Front-engine, Front-wheel drive\nเช่น Honda Civic, VW Golf, MINI Cooper\nน้ำหนักหน้ามาก ขับล้อหน้า'},
+  {id:'fr', icon:'🏎️', name:'FR', fw:'50–62%', desc:'Front-engine, Rear-wheel drive\nเช่น BMW M3, Nissan 370Z, Mazda MX-5\nมาตรฐาน balance ดีที่สุด'},
+  {id:'awd',icon:'🚗', name:'AWD', fw:'45–60%', desc:'All-Wheel Drive\nเช่น Skyline GT-R, Subaru WRX, Audi RS\nขับ 4 ล้อ grip ดีทุกสภาพ'},
+  {id:'mr', icon:'🏁', name:'MR', fw:'35–50%', desc:'Mid-engine, Rear-wheel drive\nเช่น Ferrari 458, McLaren, Honda NSX\nน้ำหนักหลัง balance ดีมาก'},
+  {id:'rr', icon:'🚀', name:'RR', fw:'25–40%', desc:'Rear-engine, Rear-wheel drive\nเช่น Porsche 911, VW Beetle\nน้ำหนักหลังมาก snap oversteer'},
+];
+
+const DISC={
+  road: {label:'ROAD RACE',cls:'road',
+    camF:-1.2,camR:-0.85,toeF:0.0,toeR:0.0,cast:6.8,
+    springF_10:6.5,springR_10:6.0,springMult:1.0,
+    arbF:26,arbR:46,
+    rhF:15.5,rhR:16.0,
+    rebMult:1.72,bumpMult:1.0,
+    bb:52,bp:100,
+    dAccel:35,dDecel:15,dFAcc:20,dFDec:8,dCtr:68,
+    aeroFpct:55,aeroRpct:72,
+    aeroTip:'Road: Rear Downforce มากกว่า Front ช่วยให้หน้าหมุนเข้าโค้งง่ายขึ้น'},
+  rally:{label:'RALLY/DIRT',cls:'rally',
+    camF:-0.7,camR:-0.35,toeF:0.0,toeR:0.1,cast:6.2,
+    springF_10:3.5,springR_10:3.0,springMult:0.60,
+    arbF:12,arbR:18,
+    rhF:21.0,rhR:22.5,
+    rebMult:1.55,bumpMult:0.85,
+    bb:49,bp:90,
+    dAccel:28,dDecel:18,dFAcc:15,dFDec:10,dCtr:65,
+    aeroFpct:30,aeroRpct:35,
+    aeroTip:'Rally: Aero ต่ำมาก เน้น Ground Clearance — downforce ทำให้กระโดดไม่ได้'},
+  drag: {label:'DRAG',cls:'drag',
+    camF:-0.25,camR:0.0,toeF:0.0,toeR:0.0,cast:5.3,
+    springF_10:8.0,springR_10:7.5,springMult:1.30,
+    arbF:10,arbR:22,
+    rhF:17.0,rhR:15.5,
+    rebMult:1.22,bumpMult:0.88,
+    bb:44,bp:80,
+    dAccel:72,dDecel:8,dFAcc:25,dFDec:5,dCtr:30,
+    aeroFpct:12,aeroRpct:18,
+    aeroTip:'Drag: Aero น้อยสุด ลด Drag — เน้น Traction ผ่าน Diff Accel Lock สูง'},
+  drift:{label:'DRIFT',cls:'drift',
+    camF:-3.5,camR:-0.1,toeF:0.12,toeR:-0.1,cast:6.2,
+    springF_10:4.5,springR_10:4.0,springMult:0.72,
+    arbF:22,arbR:35,
+    rhF:13.0,rhR:12.5,
+    rebMult:1.60,bumpMult:0.90,
+    bb:55,bp:85,
+    dAccel:85,dDecel:5,dFAcc:10,dFDec:3,dCtr:68,
+    aeroFpct:45,aeroRpct:70,
+    aeroTip:'Drift: Rear Downforce สูง ช่วยยึดหลังขณะสไลด์ — Front ต่ำให้หน้าหมุน'},
+};
+
+const LAYOUT_MOD={
+  fr: {sF:0,sR:0,arbF:-2,arbR:4,cF:0,cR:-0.08,dA:0,note:'FR: Classic balance — Rear ARB สูงกว่า Front ช่วยให้ mid-corner rotation ดี'},
+  ff: {sF:1,sR:-1,arbF:-3,arbR:8,cF:-0.2,cR:0.1,dA:15,note:'FF: Understeer สูง — Rear ARB สูงมากชดเชย + Diff Accel สูง'},
+  awd:{sF:0,sR:0,arbF:0,arbR:0,cF:0,cR:0,dA:0,note:'AWD: Grip ดีทุกสภาพ — Center Balance ≥65% Rear เพื่อลด understeer'},
+  mr: {sF:-1,sR:1,arbF:-3,arbR:2,cF:0.1,cR:-0.12,dA:-5,note:'MR: Balance ดีที่สุด — ระวัง snap oversteer ที่ limit ใช้ Decel ต่ำ'},
+  rr: {sF:-2,sR:2,arbF:4,arbR:-2,cF:0.1,cR:-0.18,dA:-12,note:'RR: น้ำหนักหลังมาก — Front ARB สูงขึ้น ป้องกัน snap oversteer'},
+};
+
+const ASPIR={
+  na:      {dA:0,  sMF:0, sMR:0,  buM:1.0,  note:''},
+  super:   {dA:6,  sMF:1, sMR:0,  buM:1.06, note:'🔩 Supercharger: Boost ที่รอบต่ำ สม่ำเสมอกว่า Turbo ไม่มี lag — เพิ่ม Diff Accel + Bump เล็กน้อย Spring หน้าแข็งขึ้นเล็กน้อยเพราะ weight ด้านหน้าเพิ่ม'},
+  turbo:   {dA:10, sMF:1, sMR:0,  buM:1.10, note:'⚡ Turbo: Power surge หลัง boost เข้า → เพิ่ม Diff Accel + Bump ขึ้น 0.5–1'},
+  twin:    {dA:20, sMF:1, sMR:1,  buM:1.18, note:'⚡⚡ Twin-Turbo: Boost แรงมาก → Spring + Bump + Rebound ทั้งหน้า-หลัง สูงขึ้น'},
+  electric:{dA:28, sMF:-1,sMR:-1, buM:0.82, note:'⚡ Electric: Torque instant → Diff Accel สูงสุด + Bump ต่ำลง รับแรงโยนได้ดี'},
+};
+
+// FH6 PI Classes (ข้อมูลจากตาราง Forza Horizon 6)
+const PI_CLR={D:'#aaaaaa',C:'#00ddff',B:'#00ff44',A:'#ffdd00',S1:'#ff8800',S2:'#ff2200',R:'#cc44ff',X:'#ff00ff'};
+const PI_RNG={D:[100,400],C:[401,500],B:[501,600],A:[601,700],S1:[701,800],S2:[801,900],R:[901,998],X:[999,999]};
+
+const TIRE_MOD={
+  stock:  {barF:0.12, barR:0.10, note:'🚗 ยาง Stock/OEM: วิ่งอุณหภูมิต่ำกว่า Race ค่า Cold Pressure สูงกว่าเล็กน้อย — ควรเปลี่ยนเป็น Sport/Race Tires เพื่อประสิทธิภาพดีกว่า'},
+  street: {barF:0.06, barR:0.05, note:''},
+  sport:  {barF:0.03, barR:0.02, note:''},
+  race:   {barF:0.00, barR:0.00, note:''},
+  semi:   {barF:-0.04,barR:-0.04,note:''},
+  rally:  {barF:0.05, barR:0.04, note:''},
+  drag:   {barF:-0.07,barR:-0.06,note:''},
+};
+
+const SYMS=[
+  {id:'us',  icon:'↙️',text:'Understeer (หัวไม่เข้า)',fixes:[
+    {n:'Front ARB',dir:'down',amt:'−2 to −4',p:'high'},{n:'Front Camber',dir:'down',amt:'−0.15 to −0.25°',p:'high'},
+    {n:'Front Tire Pressure',dir:'up',amt:'+0.05 BAR',p:'med'},{n:'Front Spring',dir:'down',amt:'−1 scale',p:'med'},{n:'Rear ARB',dir:'up',amt:'+1 to +3',p:'med'}]},
+  {id:'os',  icon:'↗️',text:'Oversteer (หางปัด)',fixes:[
+    {n:'Rear ARB',dir:'up',amt:'+2 to +4',p:'high'},{n:'Rear Camber',dir:'down',amt:'−0.15°',p:'high'},
+    {n:'Rear Diff Accel',dir:'down',amt:'−5 to −10%',p:'high'},{n:'Rear Spring',dir:'up',amt:'+1 scale',p:'med'},{n:'Rear Tire Pressure',dir:'up',amt:'+0.05 BAR',p:'med'}]},
+  {id:'snap',icon:'💥',text:'Snap Oversteer (ปัดทันที)',fixes:[
+    {n:'Rear Diff Decel',dir:'down',amt:'−5 to −8%',p:'high'},{n:'Rear Rebound',dir:'down',amt:'−0.5 to −1',p:'high'},
+    {n:'Caster',dir:'down',amt:'−0.2 to −0.3°',p:'med'},{n:'Rear Camber',dir:'up',amt:'+0.1° (less neg)',p:'med'}]},
+  {id:'bou', icon:'🏀',text:'กระเด้งบน Bumpy Road',fixes:[
+    {n:'Front/Rear Rebound',dir:'down',amt:'−1 to −2',p:'high'},{n:'Bump Stiffness',dir:'down',amt:'−0.5 to −1',p:'high'},
+    {n:'Spring (F+R)',dir:'down',amt:'−1 scale',p:'med'},{n:'ARB (F+R)',dir:'down',amt:'−3 to −4',p:'low'}]},
+  {id:'lock',icon:'🛑',text:'ล้อล็อกตอนเบรก',fixes:[
+    {n:'Brake Pressure',dir:'down',amt:'−5 to −10%',p:'high'},{n:'Brake Balance',dir:'up',amt:'+1 to +2% → Rear',p:'med'}]},
+  {id:'spin',icon:'🌀',text:'ปั่นล้อออกตัว',fixes:[
+    {n:'Rear Diff Accel',dir:'up',amt:'+8 to +15%',p:'high'},{n:'Rear Tire Pressure',dir:'up',amt:'+0.05 BAR',p:'med'},
+    {n:'Rear Spring',dir:'up',amt:'+1 scale',p:'low'}]},
+  {id:'snak',icon:'🐍',text:'โซเซบนทางตรง',fixes:[
+    {n:'Caster Angle',dir:'up',amt:'+0.3 to +0.5°',p:'high'},{n:'Rear ARB',dir:'up',amt:'+2 to +3',p:'high'},
+    {n:'Rear Toe',dir:'up',amt:'+0.1° (toe-in)',p:'med'}]},
+  {id:'slow',icon:'🐢',text:'Turn-in ช้า ไม่ตอบสนอง',fixes:[
+    {n:'Front ARB',dir:'up',amt:'+2 to +3',p:'high'},{n:'Front Tire Pressure',dir:'up',amt:'+0.05 BAR',p:'med'},
+    {n:'Caster Angle',dir:'up',amt:'+0.2°',p:'med'}]},
+  {id:'top', icon:'🏁',text:'Top Speed ไม่ถึง',fixes:[
+    {n:'Final Drive',dir:'up',amt:'+0.1 to +0.2',p:'high'},{n:'Top Gear Ratio',dir:'up',amt:'ขยาย',p:'high'},
+    {n:'Rear Aero',dir:'down',amt:'ลด % slider',p:'med'}]},
+  {id:'drag',icon:'🚀',text:'ออกตัว Drag ไม่ดี',fixes:[
+    {n:'AWD Center → Rear',dir:'up',amt:'+5 to +10%',p:'high'},{n:'Rear Diff Accel',dir:'up',amt:'+10 to +20%',p:'high'},
+    {n:'Rear Spring',dir:'up',amt:'+1 scale',p:'med'}]},
+  {id:'drt', icon:'🪨',text:'กระเด้งบน Dirt/Rally',fixes:[
+    {n:'Spring (F+R)',dir:'down',amt:'−2 scale',p:'high'},{n:'Ride Height',dir:'up',amt:'+2 to +3 cm',p:'high'},
+    {n:'Rebound (F+R)',dir:'down',amt:'−1 to −2',p:'high'},{n:'ARB (F+R)',dir:'down',amt:'−4 to −6',p:'med'}]},
+  {id:'offT',icon:'🔽',text:'รถดิ้น Off-throttle',fixes:[
+    {n:'Rear Diff Decel',dir:'down',amt:'−5 to −8%',p:'high'},{n:'Rear Spring',dir:'down',amt:'−1 scale',p:'med'},
+    {n:'Rear Rebound',dir:'down',amt:'−0.5 to −1',p:'med'}]},
+];
+
+// ═══ STATE ══════════════════════════════════════════════════
+let selectedLayout='awd', lastT=null;
+let saves=JSON.parse(localStorage.getItem('fh6v3')||'[]'), activeSym=new Set();
+const $=id=>document.getElementById(id);
+const cl=(v,mn,mx)=>Math.max(mn,Math.min(mx,v));
+const r1=v=>Math.round(v*10)/10;
+const r2=v=>Math.round(v*100)/100;
+const clamp10=v=>cl(Math.round(v),1,10);
+const clamp20=v=>cl(Math.round(v),1,20);
+
+// ═══ LAYOUT DETECTOR ════════════════════════════════════════
+function buildLayoutGrid(){
+  const g=$('layoutGrid');
+  g.innerHTML=LAYOUTS.map(L=>`
+    <div class="layout-item" id="li_${L.id}" onclick="selectLayout('${L.id}')" title="${L.desc}">
+      <div class="layout-icon">${L.icon}</div>
+      <div class="layout-name">${L.name}</div>
+      <div class="layout-fw">${L.fw}</div>
+      <div class="layout-badge">แนะนำ</div>
+    </div>`).join('');
+  selectLayout('awd');
+}
+
+function autoLayout(){
+  const fw=+$('frontWeight').value;
+  let suggested='fr';
+  if(fw>=65) suggested='ff';
+  else if(fw>=58) suggested='ff';
+  else if(fw>=50) suggested='fr';
+  else if(fw>=40) suggested='mr';
+  else suggested='rr';
+  // If AWD is selected keep it unless user changes fw drastically
+  LAYOUTS.forEach(L=>{
+    const el=$('li_'+L.id);
+    el.classList.remove('suggested');
+    $('li_'+L.id).querySelector('.layout-badge').style.display='none';
+  });
+  const sugEl=$('li_'+suggested);
+  if(sugEl){
+    sugEl.classList.add('suggested');
+    sugEl.querySelector('.layout-badge').style.display='block';
+  }
+}
+
+function selectLayout(id){
+  LAYOUTS.forEach(L=>$('li_'+L.id).classList.remove('selected'));
+  $('li_'+id).classList.add('selected');
+  selectedLayout=id;
+  const L=LAYOUTS.find(x=>x.id===id);
+  const n=$('layoutNote');
+  n.textContent=LAYOUT_MOD[id].note;
+  n.style.display='block';
+}
+
+// ═══ GEAR STYLE ═════════════════════════════════════════════
+function updGearStyle(){
+  const v=+$('gearStyle').value;
+  const labels=['เน้น Acceleration มาก','เน้น Acceleration','เน้น Acceleration เล็กน้อย','กลาง เอียง Accel','กลาง','กลาง เอียง Speed','เน้น Top Speed เล็กน้อย','เน้น Top Speed','เน้น Top Speed มาก','Top Speed สูง','Top Speed สูงสุด'];
+  $('gearStyleVal').textContent='Gearing: '+labels[v];
+}
+
+// ═══ UPGRADE TIP ════════════════════════════════════════════
+function updUgp(){
+  const m=[];
+  if(!$('ck_susp').checked) m.push('Race Spring & Damper');
+  if(!$('ck_arb').checked)  m.push('Race Anti-Roll Bar');
+  if(!$('ck_trans').checked)m.push('Race Transmission');
+  if(!$('ck_brake').checked)m.push('Race Brakes');
+  if(!$('ck_diff').checked) m.push('Race/Sport Differential');
+  const t=$('upgTip');
+  if(!m.length){t.style.display='none';return;}
+  t.style.display='block';
+  t.innerHTML='⚠️ ยังไม่ได้ติดตั้ง: <strong>'+m.join(', ')+'</strong><br>slider ที่ต้องการจะถูก lock ในเกม — ค่าที่คำนวณได้อาจใช้ไม่ได้';
+}
+
+// ═══ TAB ════════════════════════════════════════════════════
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active'); $('tab-'+id).classList.add('active');
+}
+
+// ═══ SCALE 10 PIP ═══════════════════════════════════════════
+function drawScale10(containerId, val, max){
+  const c=$(containerId); if(!c) return;
+  const pips=10;
+  c.innerHTML='';
+  for(let i=1;i<=pips;i++){
+    const d=document.createElement('div');
+    d.className='scale10-pip';
+    if(i<=Math.floor(val/max*pips)) d.classList.add('lit');
+    else if(i===Math.ceil(val/max*pips)) d.classList.add('lit-partial');
+    c.appendChild(d);
+  }
+}
+
+// ═══ LOCK ════════════════════════════════════════════════════
+function setLock(id, installed){
+  const lo=$(id);
+  if(!installed) lo.classList.add('show'); else lo.classList.remove('show');
+}
+
+// ═══ MAIN CALCULATE ═════════════════════════════════════════
+// ── STEP VALIDATION ──
+function validateAndCalc(){
+  const errs=[];
+  const fields=[
+    {id:'carName', label:'ชื่อรถ'},
+    {id:'pw',      label:'Power (hp)'},
+    {id:'tq',      label:'Torque (N·m)'},
+    {id:'wt',      label:'น้ำหนักรถ (kg)'},
+    {id:'fwp',     label:'Front Weight %'},
+  ];
+  // Clear previous errors
+  document.querySelectorAll('.field-error').forEach(el=>el.classList.remove('field-error'));
+  document.querySelectorAll('.field-err-msg').forEach(el=>{if(el.id!=='calcErrMsg')el.style.display='none'});
+
+  let ok=true;
+  fields.forEach(f=>{
+    const el=$( f.id);
+    if(!el) return;
+    const v=el.value.trim();
+    if(!v || v==='0' || isNaN(+v) && el.type!=='text' || (el.type==='text'&&!v)){
+      const wrap=el.closest('.field')||el.parentElement;
+      wrap.classList.add('field-error');
+      let msg=wrap.querySelector('.field-err-msg');
+      if(!msg){msg=document.createElement('span');msg.className='field-err-msg';wrap.appendChild(msg);}
+      msg.textContent='⚠ กรุณากรอก '+f.label;
+      msg.style.display='block';
+      if(el.type==='text'&&!v){} // name ok blank
+      else ok=false;
+      errs.push(f.label);
+    }
+  });
+
+  // Spring range check
+  const spMin=+$('springMin').value, spMax=+$('springMax').value;
+  if(spMax<=spMin){
+    const wrap=$('springMax').closest('.field')||$('springMax').parentElement;
+    wrap.classList.add('field-error');
+    let msg=wrap.querySelector('.field-err-msg');
+    if(!msg){msg=document.createElement('span');msg.className='field-err-msg';wrap.appendChild(msg);}
+    msg.textContent='⚠ Max ต้องมากกว่า Min';msg.style.display='block';
+    errs.push('Spring Max > Min');ok=false;
+  }
+
+  // Ride height range check — Front
+  const rhFmin=+$('rhFmin').value, rhFmax=+$('rhFmax').value;
+  if(rhFmax<=rhFmin){
+    const wrap=$('rhFmax').closest('.field')||$('rhFmax').parentElement;
+    wrap.classList.add('field-error');
+    let msg=wrap.querySelector('.field-err-msg');
+    if(!msg){msg=document.createElement('span');msg.className='field-err-msg';wrap.appendChild(msg);}
+    msg.textContent='⚠ Front Max ต้องมากกว่า Min';msg.style.display='block';
+    errs.push('RH Front Max > Min');ok=false;
+  }
+  // Ride height range check — Rear
+  const rhRmin=+$('rhRmin').value, rhRmax=+$('rhRmax').value;
+  if(rhRmax<=rhRmin){
+    const wrap=$('rhRmax').closest('.field')||$('rhRmax').parentElement;
+    wrap.classList.add('field-error');
+    let msg=wrap.querySelector('.field-err-msg');
+    if(!msg){msg=document.createElement('span');msg.className='field-err-msg';wrap.appendChild(msg);}
+    msg.textContent='⚠ Rear Max ต้องมากกว่า Min';msg.style.display='block';
+    errs.push('RH Rear Max > Min');ok=false;
+  }
+
+  const btn=$('btnCalc');
+  const errMsg=$('calcErrMsg');
+  if(!ok){
+    btn.classList.add('blocked');
+    errMsg.style.display='block';
+    errMsg.textContent='⚠ กรอกข้อมูลให้ครบทุกช่องที่มีกรอบแดงก่อน';
+    // Auto-scroll to first error
+    const firstErr=document.querySelector('.field-error');
+    if(firstErr) firstErr.scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>{btn.classList.remove('blocked');errMsg.style.display='none';},3000);
+    return;
+  }
+  errMsg.style.display='none';
+  calculate();
+}
+
+
+function calculate(){
+  const pw  =+$('power').value;
+  const tq  =+$('torque').value;
+  const wt  =+$('weight').value;
+  const fwp =+$('frontWeight').value/100;
+  const ng  =+$('gears').value;
+  const gs  =+$('gearStyle').value; // 0=accel, 10=topspd
+  const transType=$('transType').value;
+  const lay =selectedLayout;
+  const asp =document.querySelector('input[name=aspir]:checked').value;
+  const drv =document.querySelector('input[name=drive]:checked').value;
+  const dsc =document.querySelector('input[name=disc]:checked').value;
+  const picl=$('piClass').value;
+  const tc  =$('tireComp').value;
+  const cn  =$('carName').value||'YOUR CAR';
+
+  const hasSusp=$('ck_susp').checked, hasArb=$('ck_arb').checked;
+  const hasTrans=$('ck_trans').checked, hasBrake=$('ck_brake').checked;
+  const hasDiff=$('ck_diff').checked, hasAero=$('ck_aero').checked;
+
+  const D=DISC[dsc], LM=LAYOUT_MOD[lay], AM=ASPIR[asp], TM=TIRE_MOD[tc]||TIRE_MOD.race;
+
+  // ── TIRE PRESSURE (BAR) ──
+  const barBase={road:{f:2.15,r:2.05},rally:{f:2.20,r:2.10},drag:{f:2.25,r:2.10},drift:{f:2.05,r:1.95}}[dsc];
+  const barF=r1(cl(barBase.f-(fwp-0.5)*0.12+TM.barF, 1.6, 2.9));
+  const barR=r1(cl(barBase.r+(fwp-0.5)*0.12+TM.barR, 1.5, 2.8));
+
+  // ── ALIGNMENT ──
+  const camF=r1(cl(D.camF+LM.cF-(pw>600?.12:0)-(drv==='fwd'?.15:0),-5.5,0.5));
+  const camR=r1(cl(D.camR+LM.cR,-4.0,0.5));
+  const toeF=r1(D.toeF+(drv==='fwd'&&dsc==='road'?.1:0));
+  const toeR=r1(D.toeR+(drv==='rwd'&&tq>400?.08:0));
+  const cast=r1(cl(D.cast+(lay==='rr'?.2:0),5.0,7.0));
+
+  // ── SPRINGS (N/mm) ──
+  const spMin=+$('springMin').value||100;
+  const spMax=+$('springMax').value||2000;
+  const spRange=spMax-spMin;
+  const ptw=pw/wt;
+  const pMod=cl((ptw-0.18)*5,-2,3);
+  // Compute target % (0-1) using same discipline/layout logic as before
+  const spFpct01=cl((D.springF_10 + LM.sF + AM.sMF + pMod*0.3 + (fwp>0.58?0.5:0))/10, 0.05, 0.98);
+  const spRpct01=cl((D.springR_10 + LM.sR + AM.sMR + pMod*0.3 + (fwp<0.40?0.5:0))/10, 0.05, 0.98);
+  // Convert % to actual N/mm value
+  const spF=Math.round(spMin + spFpct01*spRange);
+  const spR=Math.round(spMin + spRpct01*spRange);
+
+  // ── ARB (scale 1–65) ──
+  const arbF=cl(D.arbF + LM.arbF + Math.round((pw/100-3)*1.5 + (fwp-0.5)*8), 5, 60);
+  const arbR=cl(D.arbR + LM.arbR - Math.round((pw/100-3)*0.5), 4, 55);
+
+  // ── RIDE HEIGHT (CM) — Front/Rear have separate ranges ──
+  const rhFmin=+$('rhFmin').value||10.0, rhFmax=+$('rhFmax').value||25.0;
+  const rhRmin=+$('rhRmin').value||10.0, rhRmax=+$('rhRmax').value||25.0;
+  const rhFpct=cl((D.rhF-10)/(25-10), 0.0, 1.0);
+  const rhRpct=cl((D.rhR-10)/(25-10), 0.0, 1.0);
+  const rhF=r1(rhFmin + rhFpct*(rhFmax-rhFmin));
+  const rhR=r1(rhRmin + rhRpct*(rhRmax-rhRmin));
+
+  // ── DAMPING (scale 1–20) ──
+  // bump = springPct × 14 × aspirMod, floor 5.5 (FH6 community baseline: bump 5–7)
+  const bumpF=clamp20(Math.max(spFpct01*14*AM.buM, 5.5));
+  const bumpR=clamp20(Math.max(spRpct01*14*AM.buM, 5.5));
+  const rebF =clamp20(bumpF*D.rebMult);
+  const rebR =clamp20(bumpR*D.rebMult);
+
+  // ── BRAKES ──
+  const bb=D.bb+(lay==='rr'?-2:0)+(drv==='fwd'?-2:0);
+  const bp=D.bp;
+
+  // ── DIFF ──
+  const isAWD=drv==='awd', isFWD=drv==='fwd';
+  const rA=cl(D.dAccel+LM.dA+AM.dA+(dsc==='drag'?8:dsc==='drift'?15:0),0,100);
+  const rD=cl(D.dDecel+(lay==='rr'?-8:0),0,100);
+  const fA=cl(D.dFAcc+(dsc==='drag'?10:0),0,100);
+  const fD=cl(D.dFDec,0,100);
+  const ctr=cl(D.dCtr+(dsc==='drag'?-10:dsc==='drift'?10:0),10,90);
+
+  // ── AERO — balance-first approach ──
+  // Step 1: คำนวณ target balance ratio (F:R) จาก discipline + layout
+  const aeroFmin=+$('aeroFmin').value||0, aeroFmax=+$('aeroFmax').value||500;
+  const aeroRmin=+$('aeroRmin').value||0, aeroRmax=+$('aeroRmax').value||500;
+  const hasAeroRange=(aeroFmax>aeroFmin && aeroRmax>aeroRmin);
+
+  // Target F:R balance — road=43:57, rally=48:52, drag=30:70, drift=40:60
+  const targetFratio={road:0.43,rally:0.48,drag:0.30,drift:0.40}[dsc];
+  const targetRratio=1-targetFratio;
+
+  // Step 2: หา downforce level (0-1) จาก discipline + power
+  const aeroLevel=cl((D.aeroFpct+D.aeroRpct)/2/100 + (pw>500?(pw-500)/3000:0), 0.05, 0.98);
+
+  let aeroFkgf, aeroRkgf, aeroFpct01, aeroRpct01;
+  if(hasAeroRange){
+    // Step 3: คำนวณ total KGF เป้าหมาย จาก midpoint ของทั้ง range
+    const fMid=(aeroFmax-aeroFmin), rMid=(aeroRmax-aeroRmin);
+    // ใช้ aeroLevel กำหนดว่าจะเอาเท่าไหร่ของ range
+    // แล้วหา F/R ที่ทำให้ได้ balance ตาม targetFratio มากที่สุด
+    // คำนวณจาก ratio: F_kgf/R_kgf = targetFratio/targetRratio
+    // F = aeroFmin + pF*fMid, R = aeroRmin + pR*rMid
+    // F/R = targetFratio/targetRratio → แก้ pF และ pR พร้อมกัน
+    // ใช้ aeroLevel เป็น anchor ของ R (rear มักเป็น reference)
+    aeroRpct01=cl(aeroLevel, 0.05, 0.98);
+    const rKgf=aeroRmin + aeroRpct01*rMid;
+    const targetFkgf=rKgf*(targetFratio/targetRratio);
+    aeroFpct01=cl((targetFkgf-aeroFmin)/fMid, 0.05, 0.98);
+    aeroFkgf=Math.round(aeroFmin + aeroFpct01*fMid);
+    aeroRkgf=Math.round(aeroRmin + aeroRpct01*rMid);
+  } else {
+    // ไม่มี range — ใช้ % เดิม
+    aeroFpct01=cl(D.aeroFpct/100, 0.05, 1.0);
+    aeroRpct01=cl(D.aeroRpct/100, 0.05, 1.0);
+    aeroFkgf=0; aeroRkgf=0;
+  }
+  const aeroFpct=Math.round(aeroFpct01*100);
+  const aeroRpct=Math.round(aeroRpct01*100);
+
+  // ── GEARING — based on gear style slider ──
+  // gs=0: short gears (accel), gs=10: long gears (top speed)
+  const gsNorm=gs/10; // 0–1
+  const grs=calcGears(ng, dsc, gsNorm, pw, wt, transType);
+  const estTopSpd=estimateTopSpd(pw, wt, gsNorm);
+  const gspd=grs.map((g,i)=>Math.round(estTopSpd*(1/g)/(1/grs[ng-1])));
+  // Final drive: lower = more accel, higher = more top speed
+  // Apply transmission type modifier on top
+  const tp=TRANS_PROFILES[transType]||TRANS_PROFILES.race;
+  const fdBase={road:3.85,rally:4.10,drag:3.50,drift:4.20}[dsc];
+  const fd=r2(fdBase - gsNorm*1.2 + (pw<250?0.3:pw>600?-0.3:0) + tp.fdMod);
+
+  // ── STORE ──
+  lastT={cn,pw,tq,wt,fwp,lay,asp,drv,dsc,picl,ng,gs,tc,transType,spFpct01,spRpct01,spMin,spMax,rhFmin,rhFmax,rhRmin,rhRmax,
+    barF,barR,camF,camR,toeF,toeR,cast,
+    spF,spR,arbF,arbR,rhF,rhR,
+    bumpF,bumpR,rebF,rebR,
+    bb,bp,rA,rD,fA,fD,ctr,
+    aeroFpct,aeroRpct,aeroFkgf,aeroRkgf,hasAeroRange,aeroFmin,aeroFmax,aeroRmin,aeroRmax,fd,grs,gspd,estTopSpd,D,
+    hasSusp,hasArb,hasTrans,hasBrake,hasDiff,hasAero};
+
+  renderResults(lastT);
+}
+
+// ═══ TRANSMISSION TYPE DATA ══════════════════════════════════
+// Each type has its own gear spacing philosophy
+// sport = wide, relaxed spacing (good street)
+// race  = progressive close-ratio (optimised for track)
+// rally = wider spread + stronger 1st for low-speed traction
+// drift = very short 1st–3rd, flat 4th–up for high sustained RPM
+const TRANS_PROFILES={
+  sport:{
+    note:'Sport Trans: gear spacing넓어 ขับสบาย Top Speed ดี แต่ Power Band ไม่ถูก RPM เสมอ',
+    ratios:[3.80,2.60,1.90,1.48,1.22,1.02,0.88,0.79,0.72,0.66],
+    fdMod:+0.15,
+  },
+  race:{
+    note:'Race Trans: Close-ratio ถี่ RPM ไม่ตก เหมาะ Road/Track — standard choice',
+    ratios:[3.50,2.35,1.72,1.35,1.10,0.90,0.78,0.70,0.63,0.57],
+    fdMod:0,
+  },
+  rally:{
+    note:'Rally Trans: 1st สั้นมาก ออกตัวดีบน Dirt — gear บนกว้างขึ้นรับ Top Speed บนถนน',
+    ratios:[4.20,2.80,2.00,1.55,1.25,1.04,0.90,0.80,0.72,0.65],
+    fdMod:+0.25,
+  },
+  drift:{
+    note:'Drift Trans: 1st–3rd สั้น รักษา RPM สูงในช่วง entry/exit โค้ง — 4th ขึ้นไปราบ',
+    ratios:[4.00,2.80,2.10,1.65,1.38,1.16,1.00,0.90,0.82,0.75],
+    fdMod:+0.30,
+  },
+};
+
+// Discipline multiplier on top of transmission base
+const DISC_GEAR_MULT={
+  road:  [3.50,2.35,1.72,1.35,1.10,0.90,0.78,0.70,0.63,0.57],
+  rally: [3.75,2.55,1.88,1.45,1.20,1.00,0.86,0.76,0.68,0.62],
+  drag:  [3.15,2.15,1.68,1.33,1.10,0.94,0.82,0.73,0.66,0.60],
+  drift: [3.75,2.65,1.95,1.52,1.25,1.05,0.90,0.80,0.72,0.66],
+};
+
+function calcGears(n, dsc, gsNorm, pw, wt, transType){
+  const tp = TRANS_PROFILES[transType] || TRANS_PROFILES.race;
+  // Blend: 60% transmission profile + 40% discipline profile
+  const discBase = DISC_GEAR_MULT[dsc] || DISC_GEAR_MULT.road;
+  const blended = tp.ratios.map((r,i) => r*0.6 + discBase[i]*0.4);
+  const ratios = blended.slice(0, n);
+  // Apply gear style: gsNorm=0→shorter (multiply up), gsNorm=1→longer (multiply down)
+  const scaleFactor = 1.0 + (gsNorm - 0.5) * 0.18;
+  return ratios.map(r => r2(r / scaleFactor));
+}
+
+function estimateTopSpd(pw, wt, gsNorm){
+  // Base estimate from power-to-weight
+  const ptw=pw/wt;
+  const base=120+ptw*380;
+  return Math.round(base*(0.85+gsNorm*0.30));
+}
+
+// ═══ RENDER ═════════════════════════════════════════════════
+function renderResults(t){
+  $('results').style.display='block';
+
+  const pi=t.picl==='X'?999:t.picl==='R'?950:Math.round((PI_RNG[t.picl][0]+PI_RNG[t.picl][1])/2);
+  $('rCar').textContent=t.cn;
+  $('rSum').textContent=`${t.wt}kg · ${t.pw}HP · ${t.tq}N·m · F${Math.round(t.fwp*100)}% · ${t.lay.toUpperCase()} · ${t.asp.toUpperCase()} · ${t.drv.toUpperCase()} · ${t.picl}`;
+  $('rPI').textContent=pi; $('rPI').style.color=PI_CLR[t.picl];
+  $('rPIL').textContent=t.picl+' CLASS';
+  $('rTag').innerHTML=`<span class="tag tag-${t.D.cls}">${t.D.label}</span>`;
+
+  // Notes
+  const AM=ASPIR[t.asp];
+  const en=$('engNote');
+  if(AM.note){en.innerHTML='<strong>⚙️ Engine Note:</strong> '+AM.note;en.style.display='block';} else en.style.display='none';
+  const lf=$('layoutFYI');
+  lf.innerHTML='<strong>📐 Layout Note:</strong> '+LAYOUT_MOD[t.lay].note; lf.style.display='block';
+  const tn=$('tireNote');
+  const TM=TIRE_MOD[t.tc];
+  if(TM&&TM.note){tn.innerHTML=TM.note;tn.style.display='block';} else tn.style.display='none';
+
+  // TIRES
+  $('rTF').textContent=t.barF+' BAR';
+  $('rTR').textContent=t.barR+' BAR';
+
+  // ALIGNMENT
+  $('rCF').textContent=t.camF+'°'; $('rCR').textContent=t.camR+'°';
+  $('rToeF').textContent=(t.toeF>=0?'+':'')+t.toeF.toFixed(1)+'°';
+  $('rToeR').textContent=(t.toeR>=0?'+':'')+t.toeR.toFixed(1)+'°';
+  $('rCast').textContent=t.cast+'°';
+  setLock('lo_align',t.hasSusp);
+
+  // BRAKES
+  $('rBB').textContent=t.bb+'% Front bias';
+  $('rBP').textContent=t.bp+'%';
+  $('bkRear').style.flex=100-t.bb;
+  $('bkFront').style.flex=t.bb;
+  $('bkMark').style.left=t.bb+'%';
+  setLock('lo_brake',t.hasBrake);
+
+  // ARB
+  $('rAF').textContent=t.arbF+' / 65';
+  $('rAR').textContent=t.arbR+' / 65';
+  drawScale10('tr_arbF',t.arbF,65);
+  drawScale10('tr_arbR',t.arbR,65);
+  setLock('lo_arb',t.hasArb);
+
+  // SPRINGS (1–10)
+  // spF/spR are now N/mm values; spFpct01/spRpct01 stored via lastT
+  const _spFpct=Math.round(t.spFpct01*100);
+  const _spRpct=Math.round(t.spRpct01*100);
+  $('rSF').textContent=t.spF+' N/mm';
+  $('rSR').textContent=t.spR+' N/mm';
+  $('spFbar').style.width=_spFpct+'%';
+  $('spFpct').textContent=t.spF+' N/mm';
+  $('spRbar').style.width=_spRpct+'%';
+  $('spRpct').textContent=t.spR+' N/mm';
+  $('rRHF').textContent=t.rhF+' cm';
+  $('rRHR').textContent=t.rhR+' cm';
+  setLock('lo_spring',t.hasSusp);
+
+  // DAMPING
+  $('rReF').textContent=t.rebF+' / 20'; $('rReR').textContent=t.rebR+' / 20';
+  $('rBuF').textContent=t.bumpF+' / 20'; $('rBuR').textContent=t.bumpR+' / 20';
+  setLock('lo_damp',t.hasSusp);
+
+  // DIFF
+  const isAWD=t.drv==='awd', isFWD=t.drv==='fwd';
+  $('diffFront').style.display=isAWD?'':'none';
+  $('diffCenter').style.display=isAWD?'':'none';
+  $('diffRearLbl').textContent=isAWD?'Rear':(isFWD?'Front':'Rear');
+  $('rDRA_l').textContent=isAWD?'Rear Acceleration':(isFWD?'Front Acceleration':'Rear Acceleration');
+  $('rDRD_l').textContent=isAWD?'Rear Deceleration':(isFWD?'Front Deceleration':'Rear Deceleration');
+  if(isAWD){$('rDFA').textContent=t.fA+'%'; $('rDFD').textContent=t.fD+'%';}
+  $('rDRA').textContent=t.rA+'%'; $('rDRD').textContent=t.rD+'%';
+  if(isAWD){
+    $('rDC').textContent=t.ctr+'% toward Rear';
+    const fFlex=100-t.ctr, rFlex=t.ctr;
+    $('ctrF').style.flex=fFlex; $('ctrR').style.flex=rFlex;
+    $('ctrMark').style.left=(100-t.ctr)+'%';
+  }
+  $('diffTip').textContent={
+    rwd:'Rear Accel ↑ = traction ↑ แต่ oversteer ↑ | Decel ↑ = ล้อล็อกตอนชะลอ',
+    fwd:'Front Accel ↑ = ลด wheelspin | Decel ต่ำ ป้องกันหน้าล็อก',
+    awd:'Center → Rear = RWD bias (oversteer ↑) | Center → Front = FWD bias (understeer ↑)'
+  }[t.drv];
+  setLock('lo_diff',t.hasDiff);
+
+  // AERO (%)
+  $('aeFbar').style.width=t.aeroFpct+'%';
+  $('aeFpct').textContent=t.hasAeroRange ? t.aeroFkgf+' KGF' : t.aeroFpct+'%';
+  $('aeRbar').style.width=t.aeroRpct+'%';
+  $('aeRpct').textContent=t.hasAeroRange ? t.aeroRkgf+' KGF' : t.aeroRpct+'%';
+  const ratio=Math.round(t.aeroFpct/(t.aeroFpct+t.aeroRpct)*100);
+  $('rAeRatio').textContent=`${ratio}% F : ${100-ratio}% R`;
+  $('aeroTip').textContent=t.D.aeroTip;
+
+  setLock('lo_aero',t.hasAero);
+
+  // GEARING
+  $('rFD').textContent=t.fd.toFixed(2);
+  $('gearRows').innerHTML=t.grs.map((g,i)=>{
+    const suf=['st','nd','rd'][i]||'th';
+    return `<div class="tr"><span class="tl">${i+1}${suf} — ~${t.gspd[i]} km/h</span><span class="tv" style="font-size:11px">${g.toFixed(2)}</span></div>`;
+  }).join('');
+  const mxs=Math.max(...t.gspd)+10;
+  $('gearBars').innerHTML=t.gspd.map((s,i)=>{
+    const w=cl(s/mxs*100,2,100);
+    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+      <div style="font-family:Orbitron,sans-serif;font-size:8px;color:var(--muted);width:16px">G${i+1}</div>
+      <div style="flex:1;height:13px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;position:relative">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:${w}%;background:linear-gradient(90deg,var(--accent),var(--lime));border-radius:2px"></div>
+        <div style="position:absolute;left:${Math.min(w+1,86)}%;top:50%;transform:translateY(-50%);font-family:Orbitron,sans-serif;font-size:8px;color:rgba(255,255,255,.85)">${s}</div>
+      </div>
+    </div>`;
+  }).join('');
+  setLock('lo_gear',t.hasTrans);
+
+  // TRANS TYPE NOTE
+  const tnEl=$('transNote');
+  const tpData=TRANS_PROFILES[t.transType]||TRANS_PROFILES.race;
+  tnEl.innerHTML='<strong>⚙️ Trans Note:</strong> '+tpData.note;
+  tnEl.style.display='block';
+
+  genExport();
+  renderCmp();
+  setTimeout(()=>$('results').scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+
+// ═══ EXPORT ═════════════════════════════════════════════════
+function genExport(){
+  if(!lastT) return;
+  const t=lastT, sep='─'.repeat(44);
+  const isAWD=t.drv==='awd';
+  const txt=`FH6 TUNING CALCULATOR v3 — EXPORT
+${sep}
+CAR     : ${t.cn}
+LAYOUT  : ${t.lay.toUpperCase()} · ${t.asp.toUpperCase()} · ${t.drv.toUpperCase()}
+STATS   : ${t.wt}kg · ${t.pw}HP · ${t.tq}N·m · Front ${Math.round(t.fwp*100)}%
+BUILD   : ${t.D.label} · ${t.picl} Class · Tire: ${t.tc} · Trans: ${(t.transType||'race').toUpperCase()}
+STYLE   : Gear Style ${t.gs}/10 · Est. Top Speed ~${t.estTopSpd} km/h
+${sep}
+[TIRES] — Unit: BAR (ใส่ค่านี้ในเกม)
+  Front Cold : ${t.barF} BAR
+  Rear  Cold : ${t.barR} BAR
+  Target Warm (Telemetry): 2.2–2.4 BAR
+
+[ALIGNMENT] — ต้องการ Race Spring & Damper
+  Front Camber : ${t.camF}°
+  Rear  Camber : ${t.camR}°
+  Front Toe    : ${(t.toeF>=0?'+':'')+t.toeF.toFixed(1)}°
+  Rear  Toe    : ${(t.toeR>=0?'+':'')+t.toeR.toFixed(1)}°
+  Caster       : ${t.cast}°
+
+[ANTIROLL BARS] — ต้องการ Race Anti-Roll Bar (Scale 1–65)
+  Front ARB : ${t.arbF}
+  Rear  ARB : ${t.arbR}
+
+[SPRINGS] — ต้องการ Race Spring & Damper (% of slider)
+  Front Spring    : ${t.spF} N/mm
+  Rear  Spring    : ${t.spR} N/mm
+  Front Ride Ht   : ${t.rhF} cm
+  Rear  Ride Ht   : ${t.rhR} cm
+
+[DAMPING] — ต้องการ Race Spring & Damper (Scale 1–20)
+  Front Rebound : ${t.rebF}
+  Rear  Rebound : ${t.rebR}
+  Front Bump    : ${t.bumpF}
+  Rear  Bump    : ${t.bumpR}
+
+[BRAKES] — ต้องการ Race Brakes
+  Balance  : ${t.bb}% Front bias (slider Rear←→Front)
+  Pressure : ${t.bp}%
+
+[DIFFERENTIAL] — ต้องการ Race/Sport Differential
+${isAWD?`  Front Accel  : ${t.fA}%
+  Front Decel  : ${t.fD}%
+  Rear  Accel  : ${t.rA}%
+  Rear  Decel  : ${t.rD}%
+  Center Bal   : ${t.ctr}% toward Rear`:t.drv==='fwd'?`  Front Accel  : ${t.rA}%
+  Front Decel  : ${t.rD}%`:`  Rear  Accel  : ${t.rA}%
+  Rear  Decel  : ${t.rD}%`}
+
+[AERO] — ต้องการ Adjustable Aero (เป็น % ของ slider เพราะแต่ละรถ range ต่างกัน)
+  Front Downforce : ${t.hasAeroRange ? t.aeroFkgf+' KGF' : t.aeroFpct+'% of slider'}
+  Rear  Downforce : ${t.hasAeroRange ? t.aeroRkgf+' KGF' : t.aeroRpct+'% of slider'}
+
+[GEARING] — ต้องการ Race Transmission
+  Final Drive : ${t.fd.toFixed(2)}
+${t.grs.map((g,i)=>`  Gear ${i+1}       : ${g.toFixed(2)}  (~${t.gspd[i]} km/h)`).join('\n')}
+${sep}
+FH6 Tuning Calculator v3`;
+  $('exportBox').textContent=txt;
+}
+
+function toggleExport(){
+  const s=$('exportSection');
+  s.style.display=s.style.display==='none'?'block':'none';
+  if(s.style.display==='block') setTimeout(()=>s.scrollIntoView({behavior:'smooth',block:'center'}),50);
+}
+
+function copyTune(){
+  navigator.clipboard.writeText($('exportBox').textContent)
+    .then(()=>notif('✓ Copied!')).catch(()=>{
+      const ta=document.createElement('textarea');
+      ta.value=$('exportBox').textContent; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta); notif('✓ Copied!');
+    });
+}
+
+// ═══ SAVE ═══════════════════════════════════════════════════
+function saveTune(){
+  if(!lastT) return;
+  saves.unshift({id:Date.now(),time:new Date().toLocaleString('th-TH'),
+    name:lastT.cn,disc:lastT.D.label,pi:lastT.picl,pw:lastT.pw,txt:$('exportBox').textContent});
+  if(saves.length>10) saves=saves.slice(0,10);
+  localStorage.setItem('fh6v3',JSON.stringify(saves));
+  renderHist(); notif('💾 Saved!');
+}
+
+function renderHist(){
+  if(!saves.length){$('histSection').style.display='none';return;}
+  $('histSection').style.display='block';
+  $('histList').innerHTML=saves.map(e=>
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap">
+      <div><div style="font-family:Orbitron,sans-serif;font-size:11px;font-weight:700">${e.name}</div>
+      <div style="font-size:9px;color:var(--muted);margin-top:2px">${e.disc} · ${e.pi} · ${e.pw}HP · ${e.time}</div></div>
+      <button class="btn-sm lime" onclick="loadSaved(${e.id})">Load</button>
+    </div>`).join('');
+}
+
+function loadSaved(id){
+  const e=saves.find(s=>s.id===id); if(!e) return;
+  $('exportBox').textContent=e.txt; $('exportSection').style.display='block';
+  $('exportSection').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function clearHist(){
+  saves=[]; localStorage.removeItem('fh6v3'); $('histSection').style.display='none'; notif('🗑 Cleared');
+}
+
+// ═══ COMPARISON ══════════════════════════════════════════════
+function renderCmp(){
+  if(!lastT){$('cmpContent').innerHTML='<div class="cmp-empty">⚠ กด Calculate ก่อน</div>';return;}
+  const discs=['road','rally','drag','drift'];
+  const res={};
+  discs.forEach(d=>res[d]=cmpCalc(d));
+
+  const rows=[
+    {n:'Tire F (BAR)',k:'barF',best:'min'},{n:'Tire R (BAR)',k:'barR',best:'min'},
+    {n:'Front Camber (°)',k:'camF',best:'none'},{n:'Rear Camber (°)',k:'camR',best:'none'},
+    {n:'Caster (°)',k:'cast',best:'none'},{n:'Front Spring (N/mm)',k:'spF',best:'none'},
+    {n:'Rear Spring (N/mm)',k:'spR',best:'none'},{n:'Front ARB',k:'arbF',best:'none'},
+    {n:'Rear ARB',k:'arbR',best:'none'},{n:'Front Bump (1–20)',k:'bumpF',best:'none'},
+    {n:'Front Rebound (1–20)',k:'rebF',best:'none'},{n:'Brake Bal (%F)',k:'bb',best:'none'},
+    {n:'Rear Diff Accel (%)',k:'rA',best:'none'},{n:'Rear Diff Decel (%)',k:'rD',best:'none'},
+    {n:'Aero Front (%)',k:'aeFp',best:'none'},{n:'Aero Rear (%)',k:'aeRp',best:'none'},
+    {n:'Final Drive',k:'fd',best:'none'},{n:'Ride Height F (cm)',k:'rhF',best:'none'},
+  ];
+
+  const tagMap={road:'tag-road',rally:'tag-rally',drag:'tag-drag',drift:'tag-drift'};
+  let html='<div style="overflow-x:auto"><table class="cmp-table"><thead><tr><th>Parameter</th>';
+  html+=discs.map(d=>`<th><span class="tag ${tagMap[d]}">${DISC[d].label}</span></th>`).join('');
+  html+='</tr></thead><tbody>';
+  rows.forEach(row=>{
+    const vals=discs.map(d=>res[d][row.k]);
+    const nums=vals.map(Number);
+    let bi=-1;
+    if(row.best==='min') bi=nums.indexOf(Math.min(...nums));
+    if(row.best==='max') bi=nums.indexOf(Math.max(...nums));
+    html+=`<tr><td class="param">${row.n}</td>`;
+    vals.forEach((v,i)=>html+=`<td class="${i===bi?'best':'val'}">${v}</td>`);
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  $('cmpContent').innerHTML=html;
+}
+
+function cmpCalc(dsc){
+  if(!lastT) return {};
+  const t=lastT, D=DISC[dsc], LM=LAYOUT_MOD[t.lay], AM=ASPIR[t.asp];
+  const ptw=t.pw/t.wt, pMod=cl((ptw-0.18)*5,-2,3);
+  const spFp=cl((D.springF_10+LM.sF+AM.sMF+pMod*0.3)/10,0.05,0.98);
+  const spRp=cl((D.springR_10+LM.sR+AM.sMR+pMod*0.3)/10,0.05,0.98);
+  const spMin=t.spMin||100, spMax=t.spMax||2000, spRange=spMax-spMin;
+  const spF=Math.round(spMin+spFp*spRange);
+  const spR=Math.round(spMin+spRp*spRange);
+  const bF=clamp20(spFp*12*AM.buM), rF=clamp20(bF*D.rebMult);
+  const arbF=cl(D.arbF+LM.arbF+Math.round((t.pw/100-3)*1.5+(t.fwp-0.5)*8),5,60);
+  const arbR=cl(D.arbR+LM.arbR-Math.round((t.pw/100-3)*0.5),4,55);
+  const rA=cl(D.dAccel+LM.dA+AM.dA,0,100);
+  const rD=cl(D.dDecel+(t.lay==='rr'?-8:0),0,100);
+  const TM=TIRE_MOD[t.tc]||TIRE_MOD.race;
+  const barBase={road:{f:2.15,r:2.05},rally:{f:2.20,r:2.10},drag:{f:2.25,r:2.10},drift:{f:2.05,r:1.95}}[dsc];
+  const gsN=(+$('gearStyle').value)/10;
+  const fdBase={road:3.85,rally:4.10,drag:3.50,drift:4.20}[dsc];
+  const tpCmp=TRANS_PROFILES[t.transType]||TRANS_PROFILES.race;
+  return {
+    barF:r1(cl(barBase.f-(t.fwp-0.5)*0.12+TM.barF,1.6,2.9)),
+    barR:r1(cl(barBase.r+(t.fwp-0.5)*0.12+TM.barR,1.5,2.8)),
+    camF:r1(cl(D.camF+LM.cF,-5.5,0.5)), camR:r1(cl(D.camR+LM.cR,-4.0,0.5)),
+    cast:r1(cl(D.cast+(t.lay==='rr'?.2:0),5.0,7.0)),
+    spF, spR, arbF, arbR, bumpF:bF, rebF:rF,
+    bb:D.bb+(t.lay==='rr'?-2:0)+(t.drv==='fwd'?-2:0),
+    rA, rD,
+    aeFp:cl(D.aeroFpct,5,100), aeRp:cl(D.aeroRpct,5,100),
+    fd:r2(fdBase-gsN*1.2+(t.pw<250?0.3:t.pw>600?-0.3:0)+tpCmp.fdMod),
+    rhF:r1((()=>{const mn=t.rhFmin||10,mx=t.rhFmax||25,p=cl((D.rhF-10)/15,0,1);return mn+p*(mx-mn);})()),
+  };
+}
+
+// ═══ SYMPTOM FIXER ════════════════════════════════════════════
+function initSym(){
+  $('symBtns').innerHTML=SYMS.map(s=>
+    `<button class="sym-btn" id="sb_${s.id}" onclick="togSym('${s.id}')">
+      <span style="font-size:16px">${s.icon}</span><span>${s.text}</span>
+    </button>`).join('');
+}
+
+function togSym(id){
+  if(activeSym.has(id)) activeSym.delete(id); else activeSym.add(id);
+  document.querySelectorAll('.sym-btn').forEach(b=>b.classList.remove('active'));
+  activeSym.forEach(sid=>{const el=$('sb_'+sid);if(el)el.classList.add('active');});
+  renderFix();
+}
+
+function renderFix(){
+  const out=$('fixOut'); if(!activeSym.size){out.innerHTML='';return;}
+  const fm={};
+  activeSym.forEach(sid=>{
+    const s=SYMS.find(x=>x.id===sid); if(!s) return;
+    s.fixes.forEach(f=>{
+      if(!fm[f.n]) fm[f.n]={name:f.n,dirs:[],amts:[],ps:[],syms:[]};
+      fm[f.n].dirs.push(f.dir); fm[f.n].amts.push(f.amt); fm[f.n].ps.push(f.p); fm[f.n].syms.push(sid);
+    });
+  });
+  const po={high:0,med:1,low:2};
+  const sorted=Object.values(fm).sort((a,b)=>Math.min(...a.ps.map(p=>po[p]))-Math.min(...b.ps.map(p=>po[p])));
+  const pCls={high:'p-high',med:'p-med',low:'p-low'}, pLbl={high:'HIGH',med:'MED',low:'LOW'};
+  const sn={}; SYMS.forEach(s=>sn[s.id]=s.text);
+
+  let html=`<div style="font-family:Orbitron,sans-serif;font-size:10px;letter-spacing:2px;color:var(--lime);margin-bottom:10px;margin-top:6px">🩺 ADJUSTMENTS (${sorted.length} sliders)</div>`;
+  html+=sorted.map(f=>{
+    const tp=f.ps.reduce((a,b)=>po[a]<=po[b]?a:b);
+    const md=f.dirs[0]; const arrow=md==='up'?'▲':'▼';
+    const clr=md==='up'?'up':'down';
+    const ams=[...new Set(f.amts)].join(' / ');
+    const ss=[...new Set(f.syms)].map(s=>sn[s]||s).join(', ');
+    return `<div class="fix-card">
+      <div class="fix-hdr">${f.name} <span class="${pCls[tp]}">${pLbl[tp]}</span></div>
+      <div class="fix-body">
+        <div class="fix-row">
+          <span style="font-size:18px;width:24px;color:var(--${clr==='up'?'lime':'accent2'})">${arrow}</span>
+          <span style="font-size:12px;color:var(--muted2);flex:1">ปรับ <strong style="color:var(--text)">${ams}</strong></span>
+          <span class="adj-val ${clr}">${md.toUpperCase()}</span>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">แก้: ${ss}</div>
+      </div>
+    </div>`;
+  }).join('');
+  html+='<div class="tip lime" style="margin-top:8px">💡 ปรับทีละ slider → ทดสอบ → ปรับต่อ | อย่าเปลี่ยนหลายค่าพร้อมกัน</div>';
+  out.innerHTML=html;
+}
+
+// ═══ NOTIFY ══════════════════════════════════════════════════
+function notif(msg){
+  const n=document.createElement('div'); n.className='notif'; n.textContent=msg;
+  document.body.appendChild(n);
+  setTimeout(()=>{n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(()=>n.remove(),300);},1800);
+}
+
+// ═══ INIT ════════════════════════════════════════════════════
+buildLayoutGrid();
+updUgp();
+updGearStyle();
+renderHist();
+initSym();
+autoLayout();
+initWelcome();
+</script>
+
+<!-- ═══════════════════════════════════════════════════
+     WELCOME OVERLAY — CSS
+════════════════════════════════════════════════════ -->
+<style>
+/* Overlay backdrop */
+#welcomeOverlay{
+  position:fixed;inset:0;z-index:9000;
+  background:rgba(4,6,12,0.96);
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+  animation:wFadeIn .4s ease;
+  overflow-y:auto;
+}
+@keyframes wFadeIn{from{opacity:0}to{opacity:1}}
+#welcomeOverlay.hiding{animation:wFadeOut .35s ease forwards}
+@keyframes wFadeOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(0.97)}}
+
+/* Card */
+.wcard{
+  background:var(--panel);
+  border:1px solid rgba(181,255,0,0.2);
+  border-radius:12px;
+  max-width:580px;
+  width:100%;
+  overflow:hidden;
+  box-shadow:0 0 60px rgba(181,255,0,0.08),0 0 120px rgba(0,0,0,0.8);
+  position:relative;
+}
+
+/* Header stripe */
+.w-stripe{
+  background:linear-gradient(135deg,#ff4d00 0%,#ff8800 50%,#b5ff00 100%);
+  padding:20px 24px 18px;
+  text-align:center;
+}
+.w-stripe .w-game{
+  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:900;
+  letter-spacing:4px;color:rgba(0,0,0,0.7);text-transform:uppercase;margin-bottom:6px;
+}
+.w-stripe .w-title{
+  font-family:'Orbitron',sans-serif;font-size:clamp(20px,5vw,28px);
+  font-weight:900;color:#000;letter-spacing:2px;line-height:1.15;
+}
+.w-stripe .w-sub{
+  font-size:14px;color:rgba(0,0,0,0.65);margin-top:6px;letter-spacing:.5px;
+}
+
+/* Body */
+.w-body{padding:22px 24px 20px}
+
+/* Intro text */
+.w-intro{
+  font-size:15px;color:var(--muted2);text-align:center;
+  line-height:1.7;margin-bottom:22px;
+}
+.w-intro strong{color:var(--text)}
+
+/* Steps */
+.w-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+.w-step{
+  display:flex;align-items:flex-start;gap:14px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:14px 16px;
+  transition:border-color .2s;
+}
+.w-step:hover{border-color:rgba(181,255,0,0.25)}
+.w-step-num{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,#ff4d00,#ff8800);
+  color:#000;font-family:'Orbitron',sans-serif;font-size:15px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.w-step-body{}
+.w-step-title{
+  font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;
+  color:var(--lime);letter-spacing:1px;margin-bottom:5px;
+}
+.w-step-desc{font-size:13px;color:var(--muted2);line-height:1.6}
+.w-step-desc strong{color:var(--text)}
+.w-step-tag{
+  display:inline-block;margin-top:6px;font-size:11px;
+  background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);
+  color:var(--accent);border-radius:3px;padding:2px 8px;
+  font-family:'Orbitron',sans-serif;letter-spacing:1px;
+}
+
+/* Checklist */
+.w-checklist-title{
+  font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;margin-bottom:10px;
+}
+.w-checks{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:22px}
+@media(max-width:440px){.w-checks{grid-template-columns:1fr}}
+.w-check{
+  display:flex;align-items:center;gap:9px;
+  background:rgba(181,255,0,0.04);border:1px solid rgba(181,255,0,0.15);
+  border-radius:6px;padding:10px 12px;
+}
+.w-check-icon{font-size:20px;flex-shrink:0}
+.w-check-text{font-size:13px;color:var(--muted2);line-height:1.4}
+.w-check-text strong{color:var(--lime);display:block;font-size:12px;
+  font-family:'Orbitron',sans-serif;letter-spacing:.5px;margin-bottom:1px}
+
+/* CTA */
+.w-cta{
+  width:100%;padding:16px;
+  background:linear-gradient(135deg,#ff4d00,#ff8800);
+  border:none;color:#000;
+  font-family:'Orbitron',sans-serif;font-size:15px;font-weight:900;
+  letter-spacing:3px;cursor:pointer;border-radius:8px;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.w-cta::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 30%,rgba(255,255,255,0.25) 50%,transparent 70%);
+  transform:translateX(-100%);transition:transform .5s;
+}
+.w-cta:hover{box-shadow:0 0 30px rgba(255,77,0,0.4);transform:translateY(-1px)}
+.w-cta:hover::after{transform:translateX(100%)}
+.w-cta:active{transform:translateY(0)}
+
+/* Skip */
+.w-skip{
+  text-align:center;margin-top:12px;
+  font-size:12px;color:var(--muted);cursor:pointer;
+  letter-spacing:1px;font-family:'Orbitron',sans-serif;
+  text-transform:uppercase;
+}
+.w-skip:hover{color:var(--muted2)}
+.w-no-show{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;cursor:pointer}
+.w-no-show input{accent-color:var(--lime);width:15px;height:15px;cursor:pointer}
+.w-no-show span{font-size:12px;color:var(--muted);letter-spacing:.5px}
+
+/* Help button (persistent) */
+#helpBtn{
+  position:fixed;bottom:22px;left:22px;z-index:8000;
+  width:46px;height:46px;border-radius:50%;
+  background:rgba(181,255,0,0.12);border:2px solid rgba(181,255,0,0.35);
+  color:var(--lime);font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 16px rgba(181,255,0,0.15);
+}
+#helpBtn:hover{background:rgba(181,255,0,0.22);box-shadow:0 0 24px rgba(181,255,0,0.3);transform:scale(1.08)}
+</style>
+
+<!-- ═══════════════════════════════════════════════════
+     WELCOME OVERLAY — HTML
+════════════════════════════════════════════════════ -->
+<div id="welcomeOverlay">
+  <div class="wcard">
+
+    <div class="w-stripe">
+      <div class="w-game">Forza Horizon 6</div>
+      <div class="w-title">TUNING<br>CALCULATOR</div>
+      <div class="w-sub">คำนวณค่าจูนรถอัตโนมัติ · ฟรี · ไม่ต้องสมัครสมาชิก</div>
+    </div>
+
+    <div class="w-body">
+
+      <div class="w-intro">
+        กรอกข้อมูลรถจากเกม → ระบบคำนวณค่าจูนให้ทันที<br>
+        <strong>ไม่ต้องมีความรู้เรื่องรถ</strong> ก็ใช้ได้
+      </div>
+
+      <!-- 3 STEPS -->
+      <div class="w-steps">
+
+        <div class="w-step">
+          <div class="w-step-num">1</div>
+          <div class="w-step-body">
+            <div class="w-step-title">เปิดเกม → ดูข้อมูลรถ</div>
+            <div class="w-step-desc">
+              ไปที่ <strong>My Cars → เลือกรถ → กด Details</strong><br>
+              จดตัวเลข Power (HP), Torque (N·m), Weight (kg), Front Weight (%)
+            </div>
+            <span class="w-step-tag">My Cars → Details</span>
+          </div>
+        </div>
+
+        <div class="w-step">
+          <div class="w-step-num">2</div>
+          <div class="w-step-body">
+            <div class="w-step-title">กรอกข้อมูล → กด Calculate</div>
+            <div class="w-step-desc">
+              ใส่ตัวเลขที่จดมา เลือก <strong>Discipline</strong> ที่จะแข่ง<br>
+              กด ⚡ Calculate แล้วรอดูผลลัพธ์
+            </div>
+            <span class="w-step-tag">ใช้เวลา ~1 นาที</span>
+          </div>
+        </div>
+
+        <div class="w-step">
+          <div class="w-step-num">3</div>
+          <div class="w-step-body">
+            <div class="w-step-title">เอาค่าไปใส่ใน Tune</div>
+            <div class="w-step-desc">
+              กลับเกม → <strong>Tune → ใส่ค่าตามที่คำนวณ</strong><br>
+              ขับทดสอบ → ถ้ารู้สึกยังไม่ถูก ใช้ <strong>🩺 Symptom Fixer</strong>
+            </div>
+            <span class="w-step-tag">Tune → ใส่ค่าทีละ section</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CHECKLIST -->
+      <div class="w-checklist-title">✅ เตรียมข้อมูลจากเกมก่อนเริ่ม</div>
+      <div class="w-checks">
+        <div class="w-check">
+          <div class="w-check-icon">⚡</div>
+          <div class="w-check-text"><strong>Power (HP)</strong>ดูจาก Car Details</div>
+        </div>
+        <div class="w-check">
+          <div class="w-check-icon">🔩</div>
+          <div class="w-check-text"><strong>Torque (N·m)</strong>ดูจาก Car Details</div>
+        </div>
+        <div class="w-check">
+          <div class="w-check-icon">⚖️</div>
+          <div class="w-check-text"><strong>Weight (kg)</strong>ดูจาก Car Details</div>
+        </div>
+        <div class="w-check">
+          <div class="w-check-icon">🎯</div>
+          <div class="w-check-text"><strong>Front Weight (%)</strong>ดูจาก Car Details</div>
+        </div>
+        <div class="w-check">
+          <div class="w-check-icon">🚗</div>
+          <div class="w-check-text"><strong>Drivetrain</strong>RWD / FWD / AWD</div>
+        </div>
+        <div class="w-check">
+          <div class="w-check-icon">🏁</div>
+          <div class="w-check-text"><strong>Discipline</strong>Road / Rally / Drag / Drift</div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <button class="w-cta" onclick="closeWelcome()">⚡ เริ่มจูนรถเลย!</button>
+
+      <label class="w-no-show">
+        <input type="checkbox" id="noShowAgain">
+        <span>ไม่ต้องแสดงหน้านี้อีก (จำการตั้งค่า)</span>
+      </label>
+
+      <div class="w-skip" onclick="closeWelcome()">ข้ามไปหน้าหลัก →</div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Help button (always visible after dismiss) -->
+<button id="helpBtn" onclick="openWelcome()" title="วิธีใช้งาน" style="display:none">?</button>
+
+<script>
+// ═══ WELCOME LOGIC ══════════════════════════════════════════
+function initWelcome(){
+  const seen = localStorage.getItem('fh6_welcomed');
+  if(seen){
+    $('welcomeOverlay').style.display = 'none';
+    $('helpBtn').style.display = 'flex';
+  }
+  // ESC key closes
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && $('welcomeOverlay').style.display !== 'none') closeWelcome();
+  });
+  // Click backdrop closes
+  $('welcomeOverlay').addEventListener('click', e => {
+    if(e.target === $('welcomeOverlay')) closeWelcome();
+  });
+}
+
+function closeWelcome(){
+  const ov = $('welcomeOverlay');
+  ov.classList.add('hiding');
+  if($('noShowAgain') && $('noShowAgain').checked){
+    localStorage.setItem('fh6_welcomed', '1');
+  }
+  setTimeout(() => {
+    ov.style.display = 'none';
+    ov.classList.remove('hiding');
+    $('helpBtn').style.display = 'flex';
+  }, 340);
+}
+
+function openWelcome(){
+  const ov = $('welcomeOverlay');
+  ov.style.display = 'flex';
+  ov.style.animation = 'none';
+  ov.offsetHeight; // reflow
+  ov.style.animation = '';
+  $('helpBtn').style.display = 'none';
+  // Uncheck "don't show" when reopening manually
+  if($('noShowAgain')) $('noShowAgain').checked = false;
+}
+</script>
+</body>
+</html>
